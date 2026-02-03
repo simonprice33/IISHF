@@ -1,0 +1,146 @@
+@import "tailwindcss";
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --background: #0a0a0a;
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+/* Basic reset */
+* { box-sizing: border-box; }
+html, body { padding: 0; margin: 0; }
+a { color: inherit; text-decoration: none; }
+
+/* Header */
+.site-header {
+  background: #3b3b3b;
+  color: #fff;
+}
+
+.site-header__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  line-height: 0;
+}
+
+/* Nav */
+.main-nav {
+  flex: 1;
+}
+
+.main-nav__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.main-nav__item {
+  position: relative;
+  white-space: nowrap;
+}
+
+.main-nav__item--right {
+  margin-left: auto;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.main-nav__link {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 8px;
+  font-size: 14px;
+}
+
+.main-nav__caret {
+  font-size: 10px;
+  margin-left: 6px;
+  opacity: 0.9;
+}
+
+.main-nav__sep {
+  opacity: 0.7;
+}
+
+/* Dropdown */
+.main-nav__item--dropdown:hover .dropdown {
+  display: block;
+}
+
+.dropdown {
+  display: none;
+  position: absolute;
+  top: calc(100% + 8px);
+  left: 0;
+  min-width: 220px;
+  padding: 10px 0;
+  margin: 0;
+  list-style: none;
+  background: #fff;
+  color: #222;
+  border-radius: 6px;
+  box-shadow: 0 10px 20px rgba(0,0,0,0.25);
+  z-index: 50;
+}
+
+.dropdown__item { margin: 0; padding: 0; }
+
+.dropdown__link {
+  display: block;
+  padding: 10px 14px;
+  font-size: 14px;
+}
+
+.dropdown__link:hover {
+  background: #f2f2f2;
+}
+
+/* Main content spacing */
+.site-main {
+  min-height: 60vh;
+}
+
+/* Footer */
+.site-footer {
+  background: #222;
+  color: #fff;
+  padding: 26px 18px;
+}
+
+.site-footer__inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  text-align: center;
+  opacity: 0.95;
+}

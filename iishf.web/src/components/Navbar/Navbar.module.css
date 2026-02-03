@@ -1,0 +1,115 @@
+.navbar {
+  background: #3a3a3a;
+  color: #fff;
+  width: 100%;
+}
+
+.inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 14px 18px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  min-width: 320px;
+}
+
+.logo {
+  display: block;
+  height: 52px;
+  width: auto;
+}
+
+.brandText {
+  line-height: 1.2;
+  font-size: 14px;
+  opacity: 0.95;
+}
+
+.menu {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.menuItem {
+  position: relative;
+}
+
+.link {
+  color: #fff;
+  text-decoration: none;
+  font-size: 14px;
+  white-space: nowrap;
+  padding: 6px 0;
+}
+
+.link:hover {
+  text-decoration: underline;
+}
+
+.dropdownToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.caret {
+  font-size: 10px;
+  transform: translateY(-1px);
+}
+
+.dropdown {
+  display: none;
+  position: absolute;
+  top: 28px;
+  left: 0;
+  background: #fff;
+  color: #111;
+  min-width: 240px;
+  border-radius: 6px;
+  padding: 8px 0;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.25);
+  z-index: 50;
+}
+
+.menuItem:hover .dropdown {
+  display: block;
+}
+
+.dropdownItem {
+  list-style: none;
+}
+
+.dropdownLink {
+  display: block;
+  padding: 8px 14px;
+  text-decoration: none;
+  color: #111;
+  font-size: 14px;
+}
+
+.dropdownLink:hover {
+  background: #f2f2f2;
+}
+
+.authLinks {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+}
+
+.separator {
+  opacity: 0.65;
+}
