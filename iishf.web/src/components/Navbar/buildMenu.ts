@@ -3,10 +3,10 @@ import type { NavItem } from "./types";
 
 export function buildMenu(items: DeliveryItem[]): NavItem[] {
   return (items ?? [])
-    .filter((x): x is DeliveryItem & { route: { path: string } } => !!x.route?.path)
+    .filter((x) => !!x.route?.path)
     .map((x) => ({
       title: x.name,
-      url: x.route.path, // now strongly typed
+      url: x.route!.path!, // safe due to filter
       children: [],
     }));
 }

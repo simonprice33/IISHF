@@ -2,9 +2,10 @@
 
 import { useEffect, useState } from "react";
 import { getChildren } from "@/lib/umbracoApi";
-import { Navbar } from "./Navbar";
+
 import type { NavItem } from "./types";
 import { buildMenu } from "./buildMenu";
+import { Navbar } from "./Navbar";
 
 export function NavBarContainer() {
   const [items, setItems] = useState<NavItem[]>([]);

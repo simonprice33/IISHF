@@ -1,5 +1,5 @@
-import Image from "next/image";
 import Link from "next/link";
+import Image from "next/image";
 import styles from "./Navbar.module.css";
 import type { NavItem } from "./types";
 
@@ -13,26 +13,23 @@ export function Navbar({ items }: Props) {
       <div className={styles.inner}>
         <div className={styles.brand}>
           <Link className={styles.logoWrap} href="/">
+            {/* Use intrinsic size, then CSS controls final rendered height */}
             <Image
               src="/images/IISHFLogo_text.png"
-              alt="International Inline Skater Hockey Federation"
-              // IMPORTANT: set these to the *actual* pixel size of your source file (or close).
-              // If your PNG is 240x160 (recommended for a crisp 80px display), use:
-              width={240}
-              height={160}
+              alt="IISHF logo"
+              width={770}
+              height={212}
               className={styles.logoImg}
               priority
             />
           </Link>
         </div>
 
-        <nav className={styles.nav}>
-          <ul className={styles.navList}>
+        <nav className={styles.nav} aria-label="Primary">
+          <ul className={styles.navRoot}>
             {items.map((item) => (
-              <li key={item.url} className={styles.navItem}>
-                <Link href={item.url} className={styles.navLink}>
-                  {item.title}
-                </Link>
+              <li className={styles.navItem} key={item.url}>
+                <Link href={item.url}>{item.title}</Link>
               </li>
             ))}
           </ul>
