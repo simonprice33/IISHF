@@ -1,61 +1,133 @@
 .header {
   background: #3f3f3f;
-  width: 100%;
+  color: white;
 }
 
 .inner {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 18px 20px;
+  padding: 14px 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 24px;
 }
 
-/* Left block */
 .brand {
   display: flex;
   align-items: center;
-  min-width: 260px;
+  gap: 14px;
+  min-width: 320px;
 }
 
-/* Avoid transforms/filters that cause blur */
 .logoWrap {
   display: inline-flex;
   align-items: center;
-  line-height: 0; /* removes baseline gap */
 }
 
 .logoImg {
-  height: 80px;     /* matches your Razor intent */
-  width: auto;      /* preserve aspect ratio */
-  max-height: 80px; /* same as Razor */
+  height: 80px;
+  width: auto;
   display: block;
 }
 
-/* Right block */
 .nav {
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-}
-
-.navRoot {
-  list-style: none;
   display: flex;
   align-items: center;
   gap: 18px;
-  margin: 0;
-  padding: 0;
-}
-
-.navItem a {
-  color: #ffffff;
-  text-decoration: none;
   font-size: 14px;
 }
 
-.navItem a:hover {
+.item {
+  position: relative;
+  padding: 6px 0;
+}
+
+.link {
+  color: white;
+  text-decoration: none;
+  opacity: 0.9;
+}
+
+.link:hover {
+  opacity: 1;
   text-decoration: underline;
+}
+
+.dropdown {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  background: white;
+  color: #111;
+  border-radius: 10px;
+  padding: 10px;
+  min-width: 240px;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.25);
+  display: none;
+  z-index: 1000;
+}
+
+.item:hover .dropdown {
+  display: block;
+}
+
+.dropdownLink {
+  display: block;
+  padding: 8px 10px;
+  color: #111;
+  text-decoration: none;
+  border-radius: 8px;
+}
+
+.dropdownLink:hover {
+  background: rgba(0,0,0,0.06);
+}
+
+.mega {
+  position: absolute;
+  top: calc(100% + 10px);
+  left: 0;
+  background: white;
+  color: #111;
+  border-radius: 12px;
+  padding: 16px;
+  min-width: 720px;
+  box-shadow: 0 16px 40px rgba(0,0,0,0.25);
+  display: none;
+  z-index: 1000;
+}
+
+.item:hover .mega {
+  display: block;
+}
+
+.megaGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
+}
+
+.megaColTitle {
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.megaLink {
+  display: block;
+  padding: 7px 10px;
+  color: #111;
+  text-decoration: none;
+  border-radius: 8px;
+}
+
+.megaLink:hover {
+  background: rgba(0,0,0,0.06);
+}
+
+.rightLinks {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: 10px;
 }
