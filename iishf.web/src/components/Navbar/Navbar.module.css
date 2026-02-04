@@ -1,105 +1,137 @@
 .header {
   background: #3f3f3f;
-  color: white;
+  color: #fff;
 }
 
 .inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 14px 18px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 24px;
+  gap: 16px;
+  padding: 10px 16px;
 }
 
 .brand {
   display: flex;
   align-items: center;
-  gap: 14px;
-  min-width: 320px;
+  min-width: 260px;
 }
 
 .logoWrap {
   display: inline-flex;
   align-items: center;
+  text-decoration: none;
 }
 
 .logoImg {
-  height: 80px;
+  height: 80px;            /* matches your Razor CSS intent */
   width: auto;
-  display: block;
+  image-rendering: auto;   /* avoid pixelated rendering */
+}
+
+.burger {
+  display: none;
+  border: 0;
+  background: transparent;
+  color: #fff;
+  font-size: 26px;
+  line-height: 1;
+  cursor: pointer;
 }
 
 .nav {
+  position: relative;
+}
+
+.navList {
   display: flex;
   align-items: center;
-  gap: 18px;
-  font-size: 14px;
+  gap: 14px;
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
-.item {
+.navItem {
   position: relative;
-  padding: 6px 0;
 }
 
-.link {
-  color: white;
+.navLinkRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.navLink {
+  color: #fff;
   text-decoration: none;
-  opacity: 0.9;
+  padding: 8px 10px;
+  border-radius: 4px;
+  white-space: nowrap;
 }
 
-.link:hover {
-  opacity: 1;
-  text-decoration: underline;
+.navLink:hover {
+  background: rgba(255,255,255,0.08);
+}
+
+.caretBtn {
+  border: 0;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+  padding: 6px 6px;
+  border-radius: 4px;
+}
+
+.caretBtn:hover {
+  background: rgba(255,255,255,0.08);
 }
 
 .dropdown {
   position: absolute;
-  top: calc(100% + 10px);
+  top: calc(100% + 8px);
   left: 0;
-  background: white;
+  z-index: 1000;
+
+  background: #fff;
   color: #111;
   border-radius: 10px;
+  box-shadow: 0 10px 24px rgba(0,0,0,0.25);
   padding: 10px;
+
   min-width: 240px;
-  box-shadow: 0 16px 40px rgba(0,0,0,0.25);
-  display: none;
-  z-index: 1000;
+  max-width: calc(100vw - 24px);
 }
 
-.item:hover .dropdown {
-  display: block;
+.dropList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
 }
 
-.dropdownLink {
-  display: block;
-  padding: 8px 10px;
-  color: #111;
+.dropItem {
+  margin: 0;
+}
+
+.dropLink {
+  display: flex;
+  align-items: center;
+  gap: 10px;
   text-decoration: none;
+  color: #111;
+  padding: 10px 10px;
   border-radius: 8px;
 }
 
-.dropdownLink:hover {
-  background: rgba(0,0,0,0.06);
+.dropLink:hover {
+  background: #f3f3f3;
 }
 
+/* Mega menu for tournaments */
 .mega {
-  position: absolute;
-  top: calc(100% + 10px);
-  left: 0;
-  background: white;
-  color: #111;
-  border-radius: 12px;
-  padding: 16px;
-  min-width: 720px;
-  box-shadow: 0 16px 40px rgba(0,0,0,0.25);
-  display: none;
-  z-index: 1000;
-}
-
-.item:hover .mega {
-  display: block;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(920px, calc(100vw - 24px));
 }
 
 .megaGrid {
@@ -108,26 +140,68 @@
   gap: 18px;
 }
 
-.megaColTitle {
+.megaCol { min-width: 0; }
+
+.megaTitle {
   font-weight: 700;
-  margin-bottom: 10px;
+  margin: 6px 10px 10px;
 }
 
-.megaLink {
-  display: block;
-  padding: 7px 10px;
-  color: #111;
-  text-decoration: none;
-  border-radius: 8px;
+/* Document "icons" (simple + dependency-free) */
+.docIcon {
+  font-size: 11px;
+  font-weight: 700;
+  color: #444;
+  border: 1px solid #ccc;
+  background: #fafafa;
+  padding: 2px 6px;
+  border-radius: 6px;
 }
 
-.megaLink:hover {
-  background: rgba(0,0,0,0.06);
+/* Status */
+.status {
+  margin-top: 6px;
+  font-size: 12px;
+  opacity: 0.9;
 }
 
-.rightLinks {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-left: 10px;
+/* Mobile */
+@media (max-width: 900px) {
+  .burger {
+    display: inline-flex;
+  }
+
+  .nav {
+    position: static;
+  }
+
+  .navList {
+    display: none;
+    position: absolute;
+    right: 16px;
+    top: 100px;
+    flex-direction: column;
+    align-items: stretch;
+    background: #3f3f3f;
+    padding: 10px;
+    border-radius: 10px;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.35);
+    width: min(92vw, 360px);
+  }
+
+  .navOpen .navList {
+    display: flex;
+  }
+
+  .dropdown {
+    position: static;
+    transform: none;
+    width: 100%;
+    max-width: 100%;
+    margin-top: 6px;
+  }
+
+  .megaGrid {
+    grid-template-columns: 1fr;
+  }
 }

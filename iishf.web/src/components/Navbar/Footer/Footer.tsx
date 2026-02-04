@@ -1,7 +1,9 @@
+import styles from "./Footer.module.css";
+
 export function Footer() {
   return (
-    <footer className="site-footer">
-      <div className="site-footer__inner">© 2023 IISHF. All Rights Reserved.</div>
+    <footer className={styles.footer}>
+      <div className={styles.inner}>© 2023 IISHF. All Rights Reserved.</div>
     </footer>
   );
 }

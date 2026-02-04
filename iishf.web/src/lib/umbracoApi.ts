@@ -1,5 +1,6 @@
+import axios from "axios";
 import type { DeliveryItem, DeliveryPagedResponse } from "./umbracoTypes";
-import { apiClient } from "./apiClient";
+import { asBool } from "./umbracoTypes";
 
 const DELIVERY_V2 = "/api/umbraco/umbraco/delivery/api/v2/content";
 
@@ -7,18 +8,10 @@ function enc(v: string) {
   return encodeURIComponent(v);
 }
 
+// Umbraco built-in: umbracoNaviHide (can come back as bool/0/1/"true"/"false")
 function isHiddenFromNav(item: DeliveryItem): boolean {
   const v = item.properties?.umbracoNaviHide;
-
-  if (typeof v === "boolean") return v;
-  if (typeof v === "number") return v === 1;
-
-  if (typeof v === "string") {
-    const s = v.toLowerCase().trim();
-    return s === "true" || s === "1";
-  }
-
-  return false;
+  return asBool(v) === true;
 }
 
 export async function getChildren(parent: string, take = 200): Promise<DeliveryItem[]> {
@@ -28,7 +21,6 @@ export async function getChildren(parent: string, take = 200): Promise<DeliveryI
     `&sort=sortOrder:asc` +
     `&take=${take}`;
 
-  const { data } = await apiClient.get<DeliveryPagedResponse<DeliveryItem>>(url);
-
-  return (data.items ?? []).filter((x) => !isHiddenFromNav(x) && !!x.route?.path);
+  const { data } = await axios.get<DeliveryPagedResponse<DeliveryItem>>(url);
+  return (data.items ?? []).filter((x) => !isHiddenFromNav(x));
 }
