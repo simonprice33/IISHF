@@ -63,28 +63,27 @@
 }
 
 .navLink {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   color: #fff;
   text-decoration: none;
   padding: 8px 10px;
   border-radius: 4px;
   white-space: nowrap;
+  border: 0;
+  background: transparent;
+  font: inherit;
+  cursor: pointer;
 }
 
 .navLink:hover {
   background: rgba(255,255,255,0.08);
 }
 
-.caretBtn {
-  border: 0;
-  background: transparent;
-  color: #fff;
-  cursor: pointer;
-  padding: 6px 6px;
-  border-radius: 4px;
-}
-
-.caretBtn:hover {
-  background: rgba(255,255,255,0.08);
+.caret {
+  font-size: 12px;
+  opacity: 0.8;
 }
 
 .dropdown {

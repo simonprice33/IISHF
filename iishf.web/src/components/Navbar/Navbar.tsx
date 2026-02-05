@@ -125,24 +125,13 @@ export function NavBar({ items, status }: Props) {
                   onMouseEnter={() => dropdown && open(key)}
                   onMouseLeave={() => dropdown && closeSoon()}
                 >
-                  {/* Use Link always so click works; dropdown opens by hover (desktop) or caret button (mobile) */}
+                  {/* Items with dropdown: click opens dropdown, not navigates */}
+                  {/* Items without dropdown: click navigates */}
                   <div className={styles.navLinkRow}>
-                    <Link
-                      href={item.url}
-                      className={styles.navLink}
-                      onClick={() => {
-                        // On mobile: clicking navigates; close menu
-                        setMobileOpen(false);
-                        setOpenKey(null);
-                      }}
-                    >
-                      {item.title}
-                    </Link>
-
-                    {dropdown && (
+                    {dropdown ? (
                       <button
-                        className={styles.caretBtn}
                         type="button"
+                        className={styles.navLink}
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
@@ -151,8 +140,20 @@ export function NavBar({ items, status }: Props) {
                         aria-label={`Toggle ${item.title} menu`}
                         aria-expanded={isOpen}
                       >
-                        ▾
+                        {item.title}
+                        <span className={styles.caret}>▾</span>
                       </button>
+                    ) : (
+                      <Link
+                        href={item.url}
+                        className={styles.navLink}
+                        onClick={() => {
+                          setMobileOpen(false);
+                          setOpenKey(null);
+                        }}
+                      >
+                        {item.title}
+                      </Link>
                     )}
                   </div>
 
