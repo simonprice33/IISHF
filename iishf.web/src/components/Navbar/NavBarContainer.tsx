@@ -1,68 +1,98 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { getChildren } from "@/lib/umbracoApi";
-import type { NavItem } from "./types";
+import { NavBar as Navbar } from "./Navbar";
 import { buildMenu } from "./buildMenu";
-import { NavBar } from "./Navbar";
+import type { NavItem } from "./types";
+import { getChildren } from "@/lib/umbracoApi";
 
-type Status = "loading" | "ok" | "error";
+function getPathKeyFromUrl(url: string): string {
+  // "/tournaments/none-title-events/" -> "tournaments/none-title-events"
+  const trimmed = url.replace(/^\//, "").replace(/\/$/, "");
+  return trimmed || "home";
+}
+
+function isNonTitleCategory(item: NavItem): boolean {
+  const key = (item.navGroupKey ?? "").toLowerCase();
+  if (key === "nontitleevents") return true;
+
+  const t = item.title.toLowerCase();
+  return t.includes("none title") || t.includes("non-title") || t.includes("non title");
+}
 
 export function NavBarContainer() {
   const [items, setItems] = useState<NavItem[]>([]);
-  const [status, setStatus] = useState<Status>("loading");
+  const [debugStatus, setDebugStatus] = useState<string>("");
 
   useEffect(() => {
     let cancelled = false;
 
     async function load() {
       try {
-        setStatus("loading");
+        setDebugStatus("Loading navigation…");
 
-        // Home children = top-level nav items
-        const topDelivery = await getChildren("home");
-        const top = buildMenu(topDelivery);
+        const topLevelDelivery = await getChildren("home");
+        const topLevel = buildMenu(topLevelDelivery);
 
-        // Fetch children for each top item in parallel
-        const withChildren = await Promise.all(
-          top.map(async (t) => {
-            // If it's a direct file URL (/media/...), no children
-            if (t.url.startsWith("/media/")) return t;
+        const enriched: NavItem[] = [];
 
-            // Delivery API expects "path" identifiers (you’re using route.path like "/news/...")
-            const pathKey = t.url.startsWith("/") ? t.url.slice(1) : t.url;
-            const childDelivery = await getChildren(pathKey);
-            const children = buildMenu(childDelivery);
+        for (const top of topLevel) {
+          const titleLower = top.title.toLowerCase();
 
-            // Special case: tournaments needs 2 levels:
-            // tournaments -> categories -> items
-            if (t.title.toLowerCase() === "tournaments") {
-              const categoriesWithChildren = await Promise.all(
-                children.map(async (cat) => {
-                  const catKey = cat.url.startsWith("/") ? cat.url.slice(1) : cat.url;
-                  const catChildrenDelivery = await getChildren(catKey);
-                  const catChildren = buildMenu(catChildrenDelivery);
-                  return { ...cat, children: catChildren };
-                })
-              );
+          // NEWS: must be a link only (no dropdown)
+          if (titleLower === "news") {
+            enriched.push({ ...top, children: [] });
+            continue;
+          }
 
-              return { ...t, children: categoriesWithChildren };
+          // Only these are dropdown containers in your UI
+          if (titleLower === "iishf" || titleLower === "tournaments" || titleLower === "documents") {
+            const key = getPathKeyFromUrl(top.url);
+            const childrenDelivery = await getChildren(key);
+            const childNav = buildMenu(childrenDelivery);
+
+            if (titleLower === "tournaments") {
+              const cats: NavItem[] = [];
+
+              for (const cat of childNav) {
+                const catKey = getPathKeyFromUrl(cat.url);
+
+                // Only apply year filter to None Title Events category
+                const catChildrenDelivery = await getChildren(
+                  catKey,
+                  500,
+                  isNonTitleCategory(cat)
+                );
+
+                const catChildrenNav = buildMenu(catChildrenDelivery);
+
+                cats.push({
+                  ...cat,
+                  children: catChildrenNav,
+                });
+              }
+
+              enriched.push({ ...top, children: cats });
+              continue;
             }
 
-            // Normal dropdowns: IISHF and Documents will now have children
-            return { ...t, children };
-          })
-        );
+            // Normal dropdown (IISHF / Documents)
+            enriched.push({ ...top, children: childNav });
+            continue;
+          }
+
+          // Default leaf
+          enriched.push({ ...top, children: [] });
+        }
 
         if (cancelled) return;
-
-        setItems(withChildren);
-        setStatus("ok");
+        setItems(enriched);
+        setDebugStatus("");
       } catch (e) {
         console.error("NavBarContainer load failed", e);
         if (cancelled) return;
         setItems([]);
-        setStatus("error");
+        setDebugStatus("Navigation failed to load");
       }
     }
 
@@ -72,5 +102,5 @@ export function NavBarContainer() {
     };
   }, []);
 
-  return <NavBar items={items} status={status} />;
+  return <Navbar items={items} debugStatus={debugStatus} />;
 }

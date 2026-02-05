@@ -2,37 +2,29 @@ import type { DeliveryItem } from "@/lib/umbracoTypes";
 import { asString } from "@/lib/umbracoTypes";
 import type { NavItem } from "./types";
 
-// Try to pull a doc link from Umbraco "File download" style props.
-// Your Delivery API example showed fileDownload: [{ url: "/media/..." , ... }]
-function extractFileUrl(item: DeliveryItem): { url: string; ext?: string } | undefined {
-  const fd = item.properties?.fileDownload;
+function getFileExtFromItem(x: DeliveryItem): string | undefined {
+  // Document items usually have properties.fileDownload: [{ url: "/media/.../file.pdf", ... }]
+  const fd = (x.properties as Record<string, unknown> | undefined)?.fileDownload;
+  if (!Array.isArray(fd) || fd.length === 0) return undefined;
 
-  if (Array.isArray(fd) && fd.length > 0) {
-    const first = fd[0] as any;
-    const url = asString(first?.url);
-    if (!url) return;
-    const ext = url.includes(".") ? url.split(".").pop()?.toLowerCase() : undefined;
-    return { url, ext };
-  }
+  const first = fd[0] as { url?: unknown } | undefined;
+  const url = asString(first?.url);
+  if (!url) return undefined;
 
-  return undefined;
+  const lastDot = url.lastIndexOf(".");
+  if (lastDot < 0) return undefined;
+
+  return url.substring(lastDot + 1).toLowerCase();
 }
 
 export function buildMenu(items: DeliveryItem[]): NavItem[] {
   return (items ?? [])
-    .filter((x) => !!x.route?.path || !!extractFileUrl(x))
-    .map((x) => {
-      const file = extractFileUrl(x);
-
-      // tournaments grouping key you mentioned
-      const navGroupKey = asString(x.properties?.navGroupKey);
-
-      return {
-        title: x.name,
-        url: file?.url ?? x.route!.path!, // safe due to filter above
-        navGroupKey,
-        fileExt: file?.ext,
-        children: [],
-      };
-    });
+    .filter((x) => !!x.route?.path)
+    .map((x) => ({
+      title: x.name,
+      url: x.route!.path!, // safe due to filter
+      navGroupKey: asString(x.properties?.navGroupKey) ?? undefined,
+      fileExt: getFileExtFromItem(x),
+      children: [],
+    }));
 }
