@@ -1,27 +1,42 @@
 import { NextResponse } from "next/server";
-import axios from "axios";
+import https from "https";
 
-export const runtime = "nodejs";
+const UMBRACO_BASE = process.env.UMBRACO_BASE_URL ?? "https://localhost:44395";
 
-const UMBRACO_BASE_URL =
-  process.env.UMBRACO_BASE_URL ?? "https://localhost:44395";
+// Next 16: params is a Promise (per your error)
+type Ctx = { params: Promise<{ path?: string[] }> };
 
-export async function GET(
-  req: Request,
-  ctx: { params: Promise<{ path: string[] }> }
-) {
+export async function GET(req: Request, ctx: Ctx) {
   const { path } = await ctx.params;
+
   const url = new URL(req.url);
 
-  const proxiedPath = "/" + path.join("/");
-  const targetUrl = `${UMBRACO_BASE_URL}${proxiedPath}${url.search}`;
+  // /api/umbraco/<everything after>
+  const proxiedPath = "/" + (path ?? []).join("/"); // safe
+  const targetUrl = `${UMBRACO_BASE}${proxiedPath}${url.search}`;
 
   try {
-    const response = await axios.get(targetUrl, {
-      headers: { Accept: "application/json" },
+    const res = await fetch(targetUrl, {
+      method: "GET",
+      headers: {
+        // keep it simple; you can forward auth headers later if needed
+        Accept: "application/json",
+      },
+      // Local dev: allow self-signed cert without needing node flags
+      // (do NOT do this in production)
+      ...(process.env.NODE_ENV === "development"
+        ? { agent: new https.Agent({ rejectUnauthorized: false }) }
+        : {}),
+      cache: "no-store",
     });
 
-    return NextResponse.json(response.data, { status: response.status });
+    const contentType = res.headers.get("content-type") ?? "application/json";
+    const body = await res.arrayBuffer();
+
+    return new NextResponse(body, {
+      status: res.status,
+      headers: { "content-type": contentType },
+    });
   } catch (err: any) {
     console.error("Umbraco proxy failed", {
       targetUrl,
@@ -30,11 +45,7 @@ export async function GET(
     });
 
     return NextResponse.json(
-      {
-        message: err?.message ?? "Proxy error",
-        code: err?.code,
-        targetUrl,
-      },
+      { error: "Umbraco proxy failed", targetUrl, message: err?.message, code: err?.code },
       { status: 500 }
     );
   }
