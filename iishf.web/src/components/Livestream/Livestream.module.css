@@ -34,177 +34,22 @@
   color: #f7941d;
 }
 
-/* Grid: 3 columns on desktop, 1 on mobile */
-.feedGrid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 20px;
+/* Single feed info (below header) */
+.singleFeedInfo {
+  text-align: center;
+  margin-bottom: 16px;
 }
 
-@media (max-width: 900px) {
-  .feedGrid {
-    grid-template-columns: 1fr;
-  }
-}
-
-.feedCard {
-  background: #2a2a2a;
-  border-radius: 12px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-}
-
-.feedHeader {
-  padding: 12px 16px;
-}
-
-.feedName {
-  font-size: 16px;
+.singleFeedName {
+  font-size: 20px;
   font-weight: 600;
   color: #fff;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-.feedMeta {
+.singleFeedMeta {
   margin-top: 4px;
-  font-size: 12px;
-  opacity: 0.7;
-  color: #ccc;
-}
-
-.player {
-  position: relative;
-  width: 100%;
-  padding-top: 56.25%;
-  background: #111;
-}
-
-.player iframe {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  border: 0;
-}
-
-.feedFooter {
-  display: flex;
-  gap: 8px;
-  padding: 12px 16px;
-}
-
-.link {
-  flex: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 12px;
-  border-radius: 8px;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 13px;
-  background: #f7941d;
-  color: #111;
-}
-
-.link:hover {
-  background: #ffa733;
-}
-
-.linkMuted {
-  flex: 1;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px 12px;
-  border-radius: 8px;
-  text-decoration: none;
-  font-weight: 600;
-  font-size: 13px;
-  background: rgba(255, 255, 255, 0.08);
-  color: white;
-}
-
-.linkMuted:hover {
-  background: rgba(255, 255, 255, 0.15);
-}
-
-.feedCount {
-  text-align: center;
-  margin-top: 16px;
-  font-size: 13px;
-  color: #888;
-}
-
-.debug {
-  padding: 8px 16px;
-  font-size: 13px;
-  opacity: 0.75;
-  color: #888;
-}
-
-/* No feeds placeholder */
-.noFeedsContainer {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  min-height: 300px;
-  background: #2a2a2a;
-  border-radius: 12px;
-  margin-top: 20px;
-}
-
-.noFeedsMessage {
-  font-size: 18px;
-  color: #888;
-  text-align: center;
-  padding: 40px 20px;
-}
-
-LiveStream.module.css
-.wrap {
-  width: 100%;
-  padding: 24px 0;
-  background: #1a1a1a;
-}
-
-.inner {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 0 16px;
-}
-
-.header {
-  margin-bottom: 20px;
-  text-align: center;
-}
-
-.kicker {
-  font-size: 12px;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
-  opacity: 0.8;
-  color: #fff;
-}
-
-.title {
-  font-size: 28px;
-  font-weight: 600;
-  margin-top: 6px;
-  color: #fff;
-}
-
-.orange {
-  color: #f7941d;
-}
-
-.meta {
-  margin-top: 6px;
   font-size: 14px;
-  opacity: 0.8;
+  opacity: 0.7;
   color: #ccc;
 }
 
@@ -265,7 +110,7 @@ LiveStream.module.css
   border: 0;
 }
 
-/* Large player for single feed - matches noFeedsContainer width */
+/* Large player for single feed */
 .playerLarge {
   position: relative;
   width: 100%;
@@ -284,12 +129,14 @@ LiveStream.module.css
   border: 0;
 }
 
+/* Footer for grid cards */
 .feedFooter {
   display: flex;
   gap: 8px;
   padding: 12px 16px;
 }
 
+/* Footer for single feed */
 .footer {
   display: flex;
   justify-content: center;
@@ -297,16 +144,17 @@ LiveStream.module.css
   margin-top: 16px;
 }
 
+/* Links for grid cards */
 .link {
   flex: 1;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 14px;
-  border-radius: 10px;
+  padding: 8px 12px;
+  border-radius: 8px;
   text-decoration: none;
   font-weight: 600;
-  font-size: 14px;
+  font-size: 13px;
   background: #f7941d;
   color: #111;
 }
@@ -320,7 +168,42 @@ LiveStream.module.css
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 14px;
+  padding: 8px 12px;
+  border-radius: 8px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 13px;
+  background: rgba(255, 255, 255, 0.08);
+  color: white;
+}
+
+.linkMuted:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Links for single feed (larger) */
+.linkLarge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-weight: 600;
+  font-size: 14px;
+  background: #f7941d;
+  color: #111;
+}
+
+.linkLarge:hover {
+  background: #ffa733;
+}
+
+.linkMutedLarge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 24px;
   border-radius: 10px;
   text-decoration: none;
   font-weight: 600;
@@ -329,7 +212,7 @@ LiveStream.module.css
   color: white;
 }
 
-.linkMuted:hover {
+.linkMutedLarge:hover {
   background: rgba(255, 255, 255, 0.15);
 }
 

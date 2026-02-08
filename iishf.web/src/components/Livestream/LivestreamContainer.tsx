@@ -1,7 +1,6 @@
-
 "use client";
 
-import React, { useEffect, useMemo, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import styles from "./LiveStream.module.css";
 import type { DeliveryItem } from "@/lib/umbracoTypes";
 import { asString } from "@/lib/umbracoTypes";
@@ -13,7 +12,7 @@ type LiveFeedLink = {
 };
 
 type LiveFeedMatch = {
-  id: string;  // NEW: Added unique ID for React key
+  id: string;
   eventName: string;
   eventPath: string;
   feedStartIso: string;
@@ -23,22 +22,7 @@ type LiveFeedMatch = {
   embedUrl: string;
 };
 
-// NEW: Constant for max visible feeds
 const MAX_VISIBLE_FEEDS = 3;
-
-// ============================================
-// UNCHANGED: All helper functions below remain the same
-// - stripSlashes
-// - fetchKeyFromRoutePath
-// - isSameLocalDate
-// - parseLinkArray
-// - detectProvider
-// - getTwitchParentParam
-// - buildEmbedUrl
-// - getRoutePath
-// - getLastRouteSegment
-// - looksLikeYearNode
-// ============================================
 
 function stripSlashes(v: string) {
   return v.replace(/^\/+/, "").replace(/\/+$/, "");
@@ -176,12 +160,8 @@ function looksLikeYearNode(item: DeliveryItem, year: number): boolean {
   return last === String(year);
 }
 
-// ============================================
-// CHANGED: Renamed from extractFirstLiveFeedForToday to extractAllLiveFeedsForToday
-// Now returns ALL feeds for today instead of just the first one
-// ============================================
 function extractAllLiveFeedsForToday(events: DeliveryItem[], today: Date): LiveFeedMatch[] {
-  const feeds: LiveFeedMatch[] = [];  // CHANGED: Now an array instead of single return
+  const feeds: LiveFeedMatch[] = [];
 
   for (const ev of events) {
     const feedStartIso = asString(ev.properties?.liveFeedDateTime);
@@ -199,9 +179,8 @@ function extractAllLiveFeedsForToday(events: DeliveryItem[], today: Date): LiveF
     const built = buildEmbedUrl(link.url);
     if (!built) continue;
 
-    // CHANGED: Push to array instead of returning immediately
     feeds.push({
-      id: asString(ev.id) ?? feedStartIso,  // NEW: Added id field
+      id: asString(ev.id) ?? feedStartIso,
       eventName: asString(ev.name) ?? "Live stream",
       eventPath: getRoutePath(ev),
       feedStartIso,
@@ -212,15 +191,11 @@ function extractAllLiveFeedsForToday(events: DeliveryItem[], today: Date): LiveF
     });
   }
 
-  // NEW: Sort feeds by start time
   feeds.sort((a, b) => new Date(a.feedStartIso).getTime() - new Date(b.feedStartIso).getTime());
 
   return feeds;
 }
 
-// ============================================
-// NEW: Function to calculate which feeds should be visible based on current time
-// ============================================
 function getVisibleFeeds(allFeeds: LiveFeedMatch[], now: Date): LiveFeedMatch[] {
   const nowTime = now.getTime();
   const upcomingOrCurrent: LiveFeedMatch[] = [];
@@ -231,7 +206,6 @@ function getVisibleFeeds(allFeeds: LiveFeedMatch[], now: Date): LiveFeedMatch[] 
     const nextFeed = allFeeds[i + 1];
     const nextStart = nextFeed ? new Date(nextFeed.feedStartIso).getTime() : Infinity;
 
-    // Include if feed hasn't started OR is currently playing (next hasn't started)
     if (feedStart > nowTime || (feedStart <= nowTime && nextStart > nowTime)) {
       upcomingOrCurrent.push(feed);
     }
@@ -241,15 +215,13 @@ function getVisibleFeeds(allFeeds: LiveFeedMatch[], now: Date): LiveFeedMatch[] 
 }
 
 export function LiveStreamContainer() {
-  // CHANGED: Now tracking allFeeds and visibleFeeds separately
   const [allFeeds, setAllFeeds] = useState<LiveFeedMatch[]>([]);
   const [visibleFeeds, setVisibleFeeds] = useState<LiveFeedMatch[]>([]);
   const [status, setStatus] = useState<string>("");
-  
-  // NEW: Track current time for auto-rotation
   const [currentTime, setCurrentTime] = useState<Date>(new Date());
+  const [isLoading, setIsLoading] = useState<boolean>(true);
 
-  // NEW: Timer to update current time every 30 seconds
+  // Update current time every 30 seconds for feed rotation
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentTime(new Date());
@@ -257,26 +229,25 @@ export function LiveStreamContainer() {
     return () => clearInterval(interval);
   }, []);
 
-  // NEW: Recalculate visible feeds when time or allFeeds changes
+  // Recalculate visible feeds when time or allFeeds changes
   useEffect(() => {
-    if (allFeeds.length > 0) {
-      const visible = getVisibleFeeds(allFeeds, currentTime);
-      setVisibleFeeds(visible);
-    }
+    const visible = getVisibleFeeds(allFeeds, currentTime);
+    setVisibleFeeds(visible);
   }, [allFeeds, currentTime]);
 
-  // CHANGED: Load function now collects ALL feeds instead of stopping at first
+  // Load all feeds for today
   useEffect(() => {
     let cancelled = false;
 
     async function load() {
       try {
-        setStatus("Searching tournaments for today's live feeds...");
+        setIsLoading(true);
+        setStatus("Searching for live feeds...");
 
         const tournamentGroups = await getChildren("tournaments", 500, false);
         const currentYear = new Date().getFullYear();
         const today = new Date();
-        const foundFeeds: LiveFeedMatch[] = [];  // NEW: Collect all feeds
+        const foundFeeds: LiveFeedMatch[] = [];
 
         for (const group of tournamentGroups) {
           const groupKey = fetchKeyFromRoutePath(group.route?.path);
@@ -298,27 +269,25 @@ export function LiveStreamContainer() {
             if (!yearKey) continue;
 
             const events = await getChildren(yearKey, 500, false);
-            console.log(`Checking ${events.length} events in ${group.name} / ${comp.name} for live feeds...`);
-            console.log(events);
-            // CHANGED: Get ALL feeds and add to array (was: return on first find)
             const feeds = extractAllLiveFeedsForToday(events, today);
             foundFeeds.push(...feeds);
           }
         }
 
         if (!cancelled) {
-          // NEW: Sort and set all feeds
           foundFeeds.sort((a, b) => 
             new Date(a.feedStartIso).getTime() - new Date(b.feedStartIso).getTime()
           );
           setAllFeeds(foundFeeds);
-          setStatus(foundFeeds.length === 0 ? "No live feeds found for today." : "");
+          setStatus("");
+          setIsLoading(false);
         }
       } catch (e) {
         console.error("LiveStreamContainer load failed", e);
         if (!cancelled) {
           setAllFeeds([]);
           setStatus("Failed to load live feeds.");
+          setIsLoading(false);
         }
       }
     }
@@ -327,72 +296,26 @@ export function LiveStreamContainer() {
     return () => { cancelled = true; };
   }, []);
 
-// //   // CHANGED: Check visibleFeeds instead of single match
-// //   if (visibleFeeds.length === 0) {
-// //     return status ? <div className={styles.debug}>{status}</div> : null;
-// //   }
+  // LOADING STATE: Show checking status inside the placeholder box
+  if (isLoading) {
+    return (
+      <section className={styles.wrap} aria-label="Live streams">
+        <div className={styles.inner}>
+          <div className={styles.header}>
+            <div className={styles.kicker}>Live Streams</div>
+            <div className={styles.title}>
+              IISHF <span className={styles.orange}>Live</span> Feed
+            </div>
+          </div>
+          <div className={styles.noFeedsContainer}>
+            <div className={styles.noFeedsMessage}>{status}</div>
+          </div>
+        </div>
+      </section>
+    );
+  }
 
-// //   // ============================================
-// //   // CHANGED: Entire render section rewritten for multiple feeds
-// //   // ============================================
-// //   return (
-// //     <section className={styles.wrap} aria-label="Live streams">
-// //       <div className={styles.inner}>
-// //         {/* CHANGED: Simplified header */}
-// //         <div className={styles.header}>
-// //           <div className={styles.kicker}>Live Streams</div>
-// //           <div className={styles.title}>
-// //             IISHF <span className={styles.orange}>Live</span> Feed
-// //           </div>
-// //         </div>
-
-// //         {/* NEW: Grid container for multiple feeds */}
-// //         <div className={styles.feedGrid}>
-// //           {visibleFeeds.map((feed) => (
-// //             <div key={feed.id} className={styles.feedCard}>
-// //               <div className={styles.feedHeader}>
-// //                 <div className={styles.feedName}>{feed.eventName}</div>
-// //                 <div className={styles.feedMeta}>
-// //                   {new Date(feed.feedStartIso).toLocaleTimeString([], { 
-// //                     hour: '2-digit', 
-// //                     minute: '2-digit' 
-// //                   })} CET • {feed.provider}
-// //                 </div>
-// //               </div>
-
-// //               <div className={styles.player}>
-// //                 <iframe
-// //                   src={feed.embedUrl}
-// //                   title={`Live stream - ${feed.eventName}`}
-// //                   allow="autoplay; fullscreen; picture-in-picture"
-// //                   allowFullScreen
-// //                   loading="lazy"
-// //                 />
-// //               </div>
-
-// //               <div className={styles.feedFooter}>
-// //                 <a className={styles.link} href={feed.feedUrl} target="_blank" rel="noreferrer">
-// //                   Open
-// //                 </a>
-// //                 <a className={styles.linkMuted} href={feed.eventPath || "#"}>
-// //                   Event
-// //                 </a>
-// //               </div>
-// //             </div>
-// //           ))}
-// //         </div>
-
-// //         {/* NEW: Feed counter */}
-// //         {allFeeds.length > MAX_VISIBLE_FEEDS && (
-// //           <div className={styles.feedCount}>
-// //             Showing {visibleFeeds.length} of {allFeeds.length} feeds today
-// //           </div>
-// //         )}
-// //       </div>
-// //     </section>
-// //   );
-
-// NO FEEDS: Show section with "no feeds" message
+  // NO FEEDS: Show "no feeds" message
   if (visibleFeeds.length === 0) {
     return (
       <section className={styles.wrap} aria-label="Live streams">
@@ -403,20 +326,17 @@ export function LiveStreamContainer() {
               IISHF <span className={styles.orange}>Live</span> Feed
             </div>
           </div>
-
           <div className={styles.noFeedsContainer}>
             <div className={styles.noFeedsMessage}>
               No video feeds are currently available for this event
             </div>
           </div>
-
-          {status && <div className={styles.debug}>{status}</div>}
         </div>
       </section>
     );
   }
 
-  // SINGLE FEED: Show larger layout (original style)
+  // SINGLE FEED: Show larger layout with consistent header
   if (visibleFeeds.length === 1) {
     const feed = visibleFeeds[0];
     return (
@@ -424,8 +344,14 @@ export function LiveStreamContainer() {
         <div className={styles.inner}>
           <div className={styles.header}>
             <div className={styles.kicker}>Live Stream</div>
-            <div className={styles.title}>{feed.eventName}</div>
-            <div className={styles.meta}>
+            <div className={styles.title}>
+              IISHF <span className={styles.orange}>Live</span> Feed
+            </div>
+          </div>
+
+          <div className={styles.singleFeedInfo}>
+            <div className={styles.singleFeedName}>{feed.eventName}</div>
+            <div className={styles.singleFeedMeta}>
               {new Date(feed.feedStartIso).toLocaleTimeString([], { 
                 hour: '2-digit', 
                 minute: '2-digit' 
@@ -444,10 +370,10 @@ export function LiveStreamContainer() {
           </div>
 
           <div className={styles.footer}>
-            <a className={styles.link} href={feed.feedUrl} target="_blank" rel="noreferrer">
+            <a className={styles.linkLarge} href={feed.feedUrl} target="_blank" rel="noreferrer">
               Open stream
             </a>
-            <a className={styles.linkMuted} href={feed.eventPath || "#"}>
+            <a className={styles.linkMutedLarge} href={feed.eventPath || "#"}>
               View event
             </a>
           </div>

@@ -2,6 +2,8 @@ export type DeliveryItem = {
   id: string;
   name: string;
   contentType: string;
+  createDate: string;   // ISO string
+  updateDate: string;   // ISO string
   route?: {
     path?: string;
   };
