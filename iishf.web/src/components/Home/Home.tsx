@@ -3,6 +3,7 @@ import { LiveStreamContainer } from "../LiveStream/LiveStreamContainer";
 import { LatestNewsContainer } from "../News/LatestNewsContainer";
 import { MissionAndValuesClient } from "../MissionAndValues/MissionAndValuesClient";
 import { getMissionItemsFromDelivery } from "@/lib/missionApi";
+import { MemberAssociations } from "@/components/MemberAssociations/MemberAssociations";
 
 export async function Home() {
   const missionItems = await getMissionItemsFromDelivery();
@@ -13,6 +14,7 @@ export async function Home() {
        <LiveStreamContainer  />
        <LatestNewsContainer limit={6} />
        <MissionAndValuesClient missionItems={missionItems} />
+       <MemberAssociations />
       {/* Additional sections will go here */}
     </main>
   );
