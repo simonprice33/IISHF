@@ -3,13 +3,7 @@
 
 import Slider from "react-slick";
 import styles from "./MemberAssociations.module.css";
-
-type GallerySlide = {
-  id: string;
-  name: string;
-  imageUrl?: string;
-  linkUrl?: string;
-};
+import type { GallerySlide } from "@/lib/galleryApi";
 
 type Props = {
   slides: GallerySlide[];
@@ -23,7 +17,7 @@ export function MemberAssociationsClient({ slides }: Props) {
     autoplay: true,
     autoplaySpeed: 1800,
     speed: 600,
-    slidesToShow: 5,
+    slidesToShow: 4,
     slidesToScroll: 1,
     pauseOnHover: true,
     responsive: [
