@@ -1,0 +1,42 @@
+.icon {
+  font-size: 63px;
+  line-height: 1;
+}
+
+/* each slide should center its text like the bootstrap layout did */
+.slide {
+  text-align: center;
+}
+
+/* Match the old "short => h1" / "long => h4" intent */
+.missionH1,
+.missionH4 {
+  color: #ffffff;
+  text-shadow: none;
+  margin: 0 auto;
+  max-width: 980px;
+}
+
+/* tune these to match your old bootstrap look */
+.missionH1 {
+  font-size: 34px;
+  line-height: 1.2;
+  font-weight: 300;
+}
+
+.missionH4 {
+  font-size: 18px;
+  line-height: 1.5;
+  font-weight: 300;
+}
+
+/* optional mobile tweak */
+@media only screen and (max-width: 600px) {
+  .missionH1 {
+    font-size: 24px;
+  }
+
+  .missionH4 {
+    font-size: 16px;
+  }
+}
