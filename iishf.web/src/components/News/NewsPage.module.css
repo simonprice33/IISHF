@@ -1,0 +1,176 @@
+/* src/components/News/NewsPage.module.css */
+
+.page {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 32px 16px;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 24px;
+}
+
+.title {
+  font-size: 44px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.subtitle {
+  margin: 8px 0 0;
+  opacity: 0.8;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 1fr 280px;
+  gap: 24px;
+}
+
+@media (max-width: 900px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+.filters {
+  order: 2;
+}
+
+@media (max-width: 900px) {
+  .filters {
+    order: 1;
+  }
+}
+
+.filtersHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.filtersTitle {
+  margin: 0;
+  font-size: 22px;
+}
+
+.clearBtn {
+  border: 0;
+  background: #666;
+  color: #fff;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.searchBlock {
+  margin: 12px 0 18px;
+}
+
+.label {
+  display: block;
+  font-size: 13px;
+  margin-bottom: 6px;
+  opacity: 0.85;
+}
+
+.searchInput {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(0,0,0,0.15);
+}
+
+.block {
+  margin: 18px 0;
+}
+
+.blockTitle {
+  margin: 0 0 10px;
+  font-size: 16px;
+}
+
+.badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.badge {
+  border: 0;
+  background: #777;
+  color: #fff;
+  padding: 6px 10px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.badgeActive {
+  background: #f28c00; /* your orange */
+}
+
+.results {
+  order: 1;
+}
+
+@media (max-width: 900px) {
+  .results {
+    order: 2;
+  }
+}
+
+.resultsHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 10px;
+}
+
+.resultsTitle {
+  margin: 0;
+  font-size: 22px;
+}
+
+.count {
+  opacity: 0.75;
+  font-size: 13px;
+}
+
+.status {
+  padding: 12px 0;
+  opacity: 0.8;
+}
+
+.statusError {
+  padding: 12px 0;
+  color: #b00020;
+}
+
+.pagination {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 18px;
+}
+
+.pageBtn {
+  border: 1px solid rgba(0,0,0,0.2);
+  background: #fff;
+  padding: 8px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.pageBtn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.pageBtnActive {
+  border-color: #f28c00;
+  color: #f28c00;
+  font-weight: 700;
+}
