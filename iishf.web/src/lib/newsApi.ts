@@ -102,3 +102,5 @@ export async function getLatestNews(take = 6): Promise<NewsListItem[]> {
 
   return items.slice(0, take);
 }
+
+

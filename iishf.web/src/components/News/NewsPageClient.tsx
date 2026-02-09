@@ -15,24 +15,19 @@ type DeliveryItem = {
   name?: string;
   route?: DeliveryRoute;
   properties?: Record<string, any>;
+  createDate?: string;
 };
 
+// Must match the type expected by NewsCard/NewsGrid (from newsApi.ts)
 export type NewsListItem = {
   id: string;
   title: string;
   url: string;
   leadIn?: string | null;
-
-  // dates
-  postDateUtcIso?: string | null;
+  articleImage?: unknown | null;  // Raw cropper object for NewsCard
+  postDateUtc?: string | null;
   createDateUtc?: string | null;
-
-  // tags/categories
-  categories: string[];
-
-  // images
-  imageUrl?: string | null;   // original
-  thumbUrl?: string | null;   // cropped "Main" like cshtml
+  categories?: string[];
 };
 
 const DEFAULT_PAGE_SIZE = 9;
@@ -46,80 +41,6 @@ function safeLower(s: string) {
   return (s ?? "").toString().toLowerCase();
 }
 
-function tryParseJson(val: any): any | null {
-  if (!val) return null;
-  if (typeof val === "object") return val;
-  if (typeof val !== "string") return null;
-  try {
-    return JSON.parse(val);
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Replicates your Razor thumbnail crop logic:
- * - Uses image cropper JSON "src"
- * - Finds crop alias "Main"
- * - If coordinates exist (x1/y1/x2/y2 as fractions), convert to pixel crop
- * - Else fallback to ?mode=crop&width&height
- */
-function buildThumbUrlFromCropper(articleImage: any): { original?: string; thumb?: string } {
-  const obj = tryParseJson(articleImage);
-  if (!obj) return {};
-
-  const original = typeof obj.src === "string" ? obj.src : undefined;
-  if (!original) return {};
-
-  const crops = Array.isArray(obj.crops) ? obj.crops : [];
-  const mainCrop = crops.find((c: any) => safeLower(c?.alias) === "main");
-
-  if (!mainCrop) {
-    // If no crop, just use original
-    return { original, thumb: original };
-  }
-
-  const width = Number(mainCrop.width);
-  const height = Number(mainCrop.height);
-
-  const coords = mainCrop.coordinates;
-  const x1 = coords?.x1;
-  const y1 = coords?.y1;
-  const x2 = coords?.x2;
-  const y2 = coords?.y2;
-
-  const hasCoords =
-    typeof x1 === "number" &&
-    typeof y1 === "number" &&
-    typeof x2 === "number" &&
-    typeof y2 === "number" &&
-    Number.isFinite(x1) &&
-    Number.isFinite(y1) &&
-    Number.isFinite(x2) &&
-    Number.isFinite(y2) &&
-    Number.isFinite(width) &&
-    Number.isFinite(height) &&
-    width > 0 &&
-    height > 0;
-
-  if (hasCoords) {
-    const cropX = Math.floor(x1 * width);
-    const cropY = Math.floor(y1 * height);
-    const cropW = Math.floor((x2 - x1) * width);
-    const cropH = Math.floor((y2 - y1) * height);
-
-    const thumb = `${original}?mode=crop&x=${cropX}&y=${cropY}&width=${cropW}&height=${cropH}`;
-    return { original, thumb };
-  }
-
-  if (Number.isFinite(width) && Number.isFinite(height) && width > 0 && height > 0) {
-    const thumb = `${original}?mode=crop&width=${width}&height=${height}`;
-    return { original, thumb };
-  }
-
-  return { original, thumb: original };
-}
-
 function toYear(iso?: string | null): number | null {
   if (!iso) return null;
   const d = new Date(iso);
@@ -128,24 +49,20 @@ function toYear(iso?: string | null): number | null {
 }
 
 function buildOrderedTags(tags: string[], currentYear: number): string[] {
-  // Mirrors your cshtml ordering:
-  // - tags with a year < currentYear come LAST (match.Success => return year < today.Year)
-  // - everything else first, then alpha
   const yearRegex = /\b(20\d{2})\b/;
 
-  return [...tags]
-    .sort((a, b) => {
-      const aMatch = a.match(yearRegex);
-      const bMatch = b.match(yearRegex);
+  return [...tags].sort((a, b) => {
+    const aMatch = a.match(yearRegex);
+    const bMatch = b.match(yearRegex);
 
-      const aIsPastYear =
-        aMatch && Number.isFinite(Number(aMatch[1])) ? Number(aMatch[1]) < currentYear : false;
-      const bIsPastYear =
-        bMatch && Number.isFinite(Number(bMatch[1])) ? Number(bMatch[1]) < currentYear : false;
+    const aIsPastYear =
+      aMatch && Number.isFinite(Number(aMatch[1])) ? Number(aMatch[1]) < currentYear : false;
+    const bIsPastYear =
+      bMatch && Number.isFinite(Number(bMatch[1])) ? Number(bMatch[1]) < currentYear : false;
 
-      if (aIsPastYear !== bIsPastYear) return aIsPastYear ? 1 : -1; // past-year tags later
-      return a.localeCompare(b);
-    });
+    if (aIsPastYear !== bIsPastYear) return aIsPastYear ? 1 : -1;
+    return a.localeCompare(b);
+  });
 }
 
 function buildQueryString(params: Record<string, string | undefined | null>) {
@@ -159,6 +76,17 @@ function buildQueryString(params: Record<string, string | undefined | null>) {
   return qs ? `?${qs}` : "";
 }
 
+/**
+ * Normalize ISO string to UTC (append Z if missing timezone)
+ */
+function normalizeIsoToUtc(value?: string | null): string | null {
+  if (!value) return null;
+  const s = value.trim();
+  if (!s) return null;
+  if (/[zZ]$/.test(s) || /[+-]\d{2}:\d{2}$/.test(s)) return s;
+  return `${s}Z`;
+}
+
 export default function NewsPageClient() {
   const router = useRouter();
   const pathname = usePathname();
@@ -168,7 +96,7 @@ export default function NewsPageClient() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
 
-  // query params (same names as your cshtml + new q)
+  // query params
   const yearParam = searchParams.get("year") ?? "";
   const catParam = searchParams.get("cat") ?? "";
   const qParam = searchParams.get("q") ?? "";
@@ -179,7 +107,7 @@ export default function NewsPageClient() {
   const searchText = qParam.trim();
   const selectedPage = Math.max(1, Number(pageParam) || 1);
 
-  // Fetch once (client-side) from your existing proxy route
+  // Fetch once (client-side)
   useEffect(() => {
     let cancelled = false;
 
@@ -188,8 +116,6 @@ export default function NewsPageClient() {
         setLoading(true);
         setLoadError(null);
 
-        // Match what you’ve been doing elsewhere: call the Next proxy,
-        // which then calls https://localhost:44395/umbraco/delivery/api/v2/...
         const res = await fetch(
           "/api/umbraco/delivery/api/v2/content?fetch=children:news&take=1000",
           { cache: "no-store" }
@@ -205,17 +131,12 @@ export default function NewsPageClient() {
         const mapped: NewsListItem[] = items.map((x) => {
           const id = (x.id ?? "").toString();
           const props = x.properties ?? {};
+          // // console.log("Raw item props:", x.name, "articleImage:", props.articleImage);
           const routePath = normalizePath(x.route?.path);
 
           const postDate =
             (props.postDate as string | undefined) ??
             (props.PostDate as string | undefined) ??
-            null;
-
-          const createDate =
-            (props.createDateUtc as string | undefined) ??
-            (props.createDate as string | undefined) ??
-            (props.CreateDateUtc as string | undefined) ??
             null;
 
           const categories = Array.isArray(props.newsCategories)
@@ -227,28 +148,25 @@ export default function NewsPageClient() {
             (props.LeadIn as string | undefined) ??
             null;
 
-          const cropper = props.articleImage ?? props.ArticleImage ?? null;
-          const { original, thumb } = buildThumbUrlFromCropper(cropper);
+          // Pass the raw articleImage object - NewsCard will handle it
+          const articleImage = props.articleImage ?? props.ArticleImage ?? null;
 
           return {
             id,
-            title: (x.name ?? "").toString(),
+            title: props.articleTitle ?? (x.name ?? "").toString(),
             url: routePath,
             leadIn,
-            postDateUtcIso: postDate,
-            createDateUtc: createDate,
+            articleImage,  // Raw object passed to NewsCard
+            postDateUtc: normalizeIsoToUtc(postDate),
+            createDateUtc: x.createDate ?? null,
             categories,
-            imageUrl: original ?? null,
-            thumbUrl: thumb ?? null,
           };
         });
 
-        // Only keep visible / dated items like your cshtml does:
+        // Filter: only show items with postDate <= now
         const now = new Date();
         const filtered = mapped.filter((n) => {
-          // cshtml: postDate <= today and IsVisible
-          // Delivery already returns visible children typically; we enforce postDate if present
-          const iso = n.postDateUtcIso ?? n.createDateUtc ?? null;
+          const iso = n.postDateUtc ?? n.createDateUtc ?? null;
           if (!iso) return true;
           const d = new Date(iso);
           if (Number.isNaN(d.getTime())) return true;
@@ -257,8 +175,8 @@ export default function NewsPageClient() {
 
         // Sort desc by postDate (fallback createDate)
         filtered.sort((a, b) => {
-          const ad = new Date(a.postDateUtcIso ?? a.createDateUtc ?? 0).getTime();
-          const bd = new Date(b.postDateUtcIso ?? b.createDateUtc ?? 0).getTime();
+          const ad = new Date(a.postDateUtc ?? a.createDateUtc ?? 0).getTime();
+          const bd = new Date(b.postDateUtc ?? b.createDateUtc ?? 0).getTime();
           return bd - ad;
         });
 
@@ -276,14 +194,14 @@ export default function NewsPageClient() {
     };
   }, []);
 
-  // Build filter options from ALL items (like cshtml does)
+  // Build filter options from ALL items
   const filterData = useMemo(() => {
     const years = new Set<number>();
     const tags = new Set<string>();
     const nowYear = new Date().getUTCFullYear();
 
     allItems.forEach((n) => {
-      const y = toYear(n.postDateUtcIso ?? n.createDateUtc ?? null);
+      const y = toYear(n.postDateUtc ?? n.createDateUtc ?? null);
       if (y) years.add(y);
       (n.categories ?? []).forEach((c) => tags.add(c));
     });
@@ -300,7 +218,7 @@ export default function NewsPageClient() {
 
     if (selectedYear > 0) {
       items = items.filter((n) => {
-        const y = toYear(n.postDateUtcIso ?? n.createDateUtc ?? null);
+        const y = toYear(n.postDateUtc ?? n.createDateUtc ?? null);
         return y === selectedYear;
       });
     }
@@ -321,7 +239,7 @@ export default function NewsPageClient() {
     return items;
   }, [allItems, selectedYear, selectedCat, searchText]);
 
-  // Paging (same idea as cshtml)
+  // Paging
   const pageSize = DEFAULT_PAGE_SIZE;
   const numberOfPages = Math.max(1, Math.ceil(filteredItems.length / pageSize));
   const safePage = Math.min(selectedPage, numberOfPages);
@@ -347,7 +265,7 @@ export default function NewsPageClient() {
     router.push(pathname);
   }
 
-  // Pagination window like cshtml (max 10)
+  // Pagination window (max 10)
   const pageWindow = useMemo(() => {
     let startPage = 1;
     let endPage = numberOfPages;
@@ -376,7 +294,7 @@ export default function NewsPageClient() {
       </div>
 
       <div className={styles.layout}>
-        {/* Filters (right on desktop like cshtml) */}
+        {/* Filters */}
         <aside className={styles.filters}>
           <div className={styles.filtersHeader}>
             <h2 className={styles.filtersTitle}>Filters</h2>
@@ -451,7 +369,6 @@ export default function NewsPageClient() {
                 </div>
               </div>
 
-              {/* Uses your existing NewsGrid + NewsCard visuals */}
               <NewsGrid items={pagedItems} />
 
               {/* Paging */}

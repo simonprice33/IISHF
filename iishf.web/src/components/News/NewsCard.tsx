@@ -6,7 +6,9 @@ import { buildNewsThumbUrl } from "../../lib/newsShared";
 import { formatDateUKFromUtcIso } from "../../lib/date";
 
 export function NewsCard({ item }: { item: NewsListItem }) {
+  // // console.log("NewsCard item:", item.title, "articleImage:", item.articleImage);
   const thumbUrl = buildNewsThumbUrl(item.articleImage);
+  // // console.log("thumbUrl result:", thumbUrl);
 
   // Prefer postDate if present, else createDate
   const date = formatDateUKFromUtcIso(item.postDateUtc ?? item.createDateUtc ?? null);
