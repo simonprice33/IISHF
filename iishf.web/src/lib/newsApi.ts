@@ -1,3 +1,4 @@
+// src/lib/newsApi.ts
 import axios from "axios";
 
 export type DeliveryPagedResponse<T> = {
@@ -9,7 +10,7 @@ export type DeliveryItem = {
   id: string;
   name?: string;
   createDate?: string; // ISO with Z
-  updateDate?: string; // ignored for ordering
+  updateDate?: string;
   route?: { path?: string };
   properties?: Record<string, unknown>;
 };
@@ -23,16 +24,12 @@ export type NewsListItem = {
   articleImage?: unknown | null;
 
   // sorting fields
-  postDateUtc?: string | null;   // normalized to UTC
-  createDateUtc?: string | null; // already UTC from API
+  postDateUtc?: string | null;
+  createDateUtc?: string | null;
 };
 
 function getSiteOrigin(): string {
-  return (
-    process.env.NEXT_PUBLIC_SITE_URL ||
-    process.env.SITE_URL ||
-    "http://localhost:3000"
-  );
+  return process.env.NEXT_PUBLIC_SITE_URL || process.env.SITE_URL || "http://localhost:3000";
 }
 
 function toAbsoluteUrl(path: string): string {
@@ -41,10 +38,8 @@ function toAbsoluteUrl(path: string): string {
 }
 
 /**
- * Umbraco returns postDate without timezone sometimes: "2024-01-02T12:00:00"
- * JS Date.parse treats that as local time. We want UTC consistency.
- *
- * If no timezone suffix is present, assume UTC and append "Z".
+ * Umbraco can return postDate without timezone e.g. "2026-01-06T00:00:00"
+ * Treat missing timezone as UTC by appending Z.
  */
 function normalizeIsoToUtc(value?: string | null): string | null {
   if (!value) return null;
@@ -52,9 +47,6 @@ function normalizeIsoToUtc(value?: string | null): string | null {
   const s = value.trim();
   if (!s) return null;
 
-  // Already has timezone info?
-  // - ends with Z
-  // - or has +HH:MM / -HH:MM
   if (/[zZ]$/.test(s) || /[+-]\d{2}:\d{2}$/.test(s)) return s;
 
   return `${s}Z`;
@@ -68,8 +60,12 @@ function toEpochUtc(value?: string | null): number {
   return Number.isFinite(ms) ? ms : Number.NEGATIVE_INFINITY;
 }
 
-export async function getLatestNews(take = 6, parentKey = "news"): Promise<NewsListItem[]> {
-  // Fetch enough to sort properly
+/**
+ * Returns latest news, sorted newest-first.
+ * Signature intentionally kept as ONE optional arg to avoid ripples.
+ */
+export async function getLatestNews(take = 6): Promise<NewsListItem[]> {
+  const parentKey = "news";
   const upstreamTake = Math.max(100, take);
 
   const path =
@@ -78,7 +74,6 @@ export async function getLatestNews(take = 6, parentKey = "news"): Promise<NewsL
     `&take=${upstreamTake}`;
 
   const url = toAbsoluteUrl(path);
-
   const { data } = await axios.get<DeliveryPagedResponse<DeliveryItem>>(url);
 
   const items: NewsListItem[] = (data.items ?? [])
@@ -92,28 +87,16 @@ export async function getLatestNews(take = 6, parentKey = "news"): Promise<NewsL
         title: props.articleTitle ?? x.name ?? "Untitled",
         leadIn: props.leadIn ?? null,
         articleImage: props.articleImage ?? null,
-
-        // Normalize postDate to UTC so ordering is correct
         postDateUtc: normalizeIsoToUtc(props.postDate ?? null),
         createDateUtc: x.createDate ?? null,
       };
     });
 
-  /**
-   * ✅ AUTHORITATIVE ORDER (latest first):
-   * 1) postDate DESC (normalized UTC)
-   * 2) createDate DESC
-   * 3) stable tie-breaker (id)
-   *
-   * IMPORTANT: primary date uses postDate if present, otherwise createDate.
-   */
   items.sort((a, b) => {
     const aPrimary = a.postDateUtc ? toEpochUtc(a.postDateUtc) : toEpochUtc(a.createDateUtc);
     const bPrimary = b.postDateUtc ? toEpochUtc(b.postDateUtc) : toEpochUtc(b.createDateUtc);
 
     if (bPrimary !== aPrimary) return bPrimary - aPrimary;
-
-    // Stable tie-breaker so list doesn't shuffle between runs
     return (b.id || "").localeCompare(a.id || "");
   });
 

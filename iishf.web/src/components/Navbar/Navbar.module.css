@@ -204,3 +204,10 @@
     grid-template-columns: 1fr;
   }
 }
+
+.debugStatus {
+  font-size: 0.9rem;
+  padding: 6px 10px;
+  margin-right: 12px;
+  opacity: 0.85;
+}

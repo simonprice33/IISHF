@@ -1,5 +1,13 @@
 "use client";
 
+/**
+ * src/components/Navbar/Navbar.tsx
+ *
+ * Minimal adjustments:
+ * - Accept debugStatus as an optional prop for compatibility, but DO NOT render it.
+ * - Keep the rest of the working behaviour exactly the same.
+ */
+
 import Link from "next/link";
 import Image from "next/image";
 import { useMemo, useState } from "react";
@@ -8,6 +16,13 @@ import styles from "./Navbar.module.css";
 
 type Props = {
   items: NavItem[];
+
+  /**
+   * Kept only for backwards compatibility with earlier container variants.
+   * Per your requirement, we do not render this.
+   */
+  debugStatus?: string;
+
   status?: "loading" | "ok" | "error";
 };
 
@@ -31,10 +46,13 @@ function guessTournamentGroup(item: NavItem): NavGroupKey {
 function DocIcon({ ext }: { ext?: string }) {
   const e = (ext ?? "").toLowerCase();
   const label =
-    e === "pdf" ? "PDF" :
-    e === "doc" || e === "docx" ? "DOC" :
-    e === "xls" || e === "xlsx" ? "XLS" :
-    "FILE";
+    e === "pdf"
+      ? "PDF"
+      : e === "doc" || e === "docx"
+        ? "DOC"
+        : e === "xls" || e === "xlsx"
+          ? "XLS"
+          : "FILE";
 
   return <span className={styles.docIcon}>{label}</span>;
 }
@@ -72,7 +90,11 @@ export function NavBar({ items, status }: Props) {
 
     return [
       { key: "europeanCups", title: groupLabel("europeanCups"), items: cols["europeanCups"] ?? [] },
-      { key: "europeanChampionships", title: groupLabel("europeanChampionships"), items: cols["europeanChampionships"] ?? [] },
+      {
+        key: "europeanChampionships",
+        title: groupLabel("europeanChampionships"),
+        items: cols["europeanChampionships"] ?? [],
+      },
       { key: "noneTitleEvents", title: groupLabel("noneTitleEvents"), items: cols["noneTitleEvents"] ?? [] },
     ];
   }, [tournaments]);
@@ -213,13 +235,19 @@ export function NavBar({ items, status }: Props) {
             })}
 
             {/* Auth links can be hard-coded for now */}
-            <li className={styles.navItem}><Link className={styles.navLink} href="/signup">Sign up</Link></li>
-            <li className={styles.navItem}><Link className={styles.navLink} href="/signin">Sign in</Link></li>
+            <li className={styles.navItem}>
+              <Link className={styles.navLink} href="/signup">
+                Sign up
+              </Link>
+            </li>
+            <li className={styles.navItem}>
+              <Link className={styles.navLink} href="/signin">
+                Sign in
+              </Link>
+            </li>
           </ul>
 
-          {status === "error" && (
-            <div className={styles.status}>Menu failed to load.</div>
-          )}
+          {status === "error" && <div className={styles.status}>Menu failed to load.</div>}
         </nav>
       </div>
     </header>
