@@ -174,3 +174,62 @@
   color: #f28c00;
   font-weight: 700;
 }
+
+/* Scrollable tags list */
+.tagListContainer {
+max-height: 250px;
+  overflow-y: auto;
+  border: 1px solid #444;
+  border-radius: 8px;
+  background: #3a3a3a;
+}
+
+.tagItem {
+  display: block;
+  width: 100%;
+  text-align: left;
+  padding: 10px 14px;
+  border: none;
+  background: transparent;
+  color: #ccc;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+
+.tagItem:hover {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+.tagItem:not(:last-child) {
+ border-bottom: 1px solid #4a4a4a;
+}
+
+.tagItemActive {
+  background: #000000;
+  color: #fff;
+  font-weight: 600;
+}
+
+.tagItemActive:hover {
+  background: #ffa733;
+}
+
+/* Scrollbar styling */
+.tagListContainer::-webkit-scrollbar {
+  width: 8px;
+}
+
+.tagListContainer::-webkit-scrollbar-track {
+   background: #2a2a2a;
+  border-radius: 4px;
+}
+
+.tagListContainer::-webkit-scrollbar-thumb {
+  background: #555;
+  border-radius: 4px;
+}
+
+.tagListContainer::-webkit-scrollbar-thumb:hover {
+  background: #777;
+}

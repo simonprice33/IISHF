@@ -48,20 +48,17 @@ function toYear(iso?: string | null): number | null {
   return d.getUTCFullYear();
 }
 
-function buildOrderedTags(tags: string[], currentYear: number): string[] {
-  const yearRegex = /\b(20\d{2})\b/;
-
+function buildOrderedTags(tags: string[]): string[] {
   return [...tags].sort((a, b) => {
-    const aMatch = a.match(yearRegex);
-    const bMatch = b.match(yearRegex);
+    const aStartsWithNumber = /^\d/.test(a);
+    const bStartsWithNumber = /^\d/.test(b);
 
-    const aIsPastYear =
-      aMatch && Number.isFinite(Number(aMatch[1])) ? Number(aMatch[1]) < currentYear : false;
-    const bIsPastYear =
-      bMatch && Number.isFinite(Number(bMatch[1])) ? Number(bMatch[1]) < currentYear : false;
+    // Numbers go to bottom
+    if (aStartsWithNumber && !bStartsWithNumber) return 1;
+    if (!aStartsWithNumber && bStartsWithNumber) return -1;
 
-    if (aIsPastYear !== bIsPastYear) return aIsPastYear ? 1 : -1;
-    return a.localeCompare(b);
+    // Otherwise alphabetical
+    return a.localeCompare(b, undefined, { sensitivity: "base" });
   });
 }
 
@@ -194,11 +191,9 @@ export default function NewsPageClient() {
     };
   }, []);
 
-  // Build filter options from ALL items
-  const filterData = useMemo(() => {
+   const filterData = useMemo(() => {
     const years = new Set<number>();
     const tags = new Set<string>();
-    const nowYear = new Date().getUTCFullYear();
 
     allItems.forEach((n) => {
       const y = toYear(n.postDateUtc ?? n.createDateUtc ?? null);
@@ -207,7 +202,7 @@ export default function NewsPageClient() {
     });
 
     const yearList = Array.from(years).sort((a, b) => b - a);
-    const tagList = buildOrderedTags(Array.from(tags), nowYear);
+    const tagList = buildOrderedTags(Array.from(tags));
 
     return { yearList, tagList };
   }, [allItems]);
@@ -335,16 +330,16 @@ export default function NewsPageClient() {
             </div>
           </div>
 
-          <div className={styles.block}>
+           <div className={styles.block}>
             <h3 className={styles.blockTitle}>Tags</h3>
-            <div className={styles.badges}>
+            <div className={styles.tagListContainer}>
               {filterData.tagList.map((t) => {
                 const active = selectedCat.localeCompare(t, undefined, { sensitivity: "accent" }) === 0;
                 return (
                   <button
                     key={t}
                     type="button"
-                    className={`${styles.badge} ${active ? styles.badgeActive : ""}`}
+                    className={`${styles.tagItem} ${active ? styles.tagItemActive : ""}`}
                     onClick={() => go({ year: selectedYear, cat: active ? "" : t, q: searchText, page: 1 })}
                   >
                     {t}
