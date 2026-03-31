@@ -1,0 +1,62 @@
+.body {
+  padding: 48px 0 64px;
+}
+
+.inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.richText {
+  line-height: 1.7;
+  color: #222;
+}
+
+.richText h1,
+.richText h2,
+.richText h3,
+.richText h4 {
+  color: #111;
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+}
+
+.richText p {
+  margin: 0 0 1em;
+}
+
+.richText a {
+  color: #f7941d;
+  text-decoration: underline;
+}
+
+.richText ul,
+.richText ol {
+  padding-left: 1.5em;
+  margin-bottom: 1em;
+}
+
+.richText img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 6px;
+}
+
+.richText table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 1em;
+}
+
+.richText th,
+.richText td {
+  border: 1px solid #e5e7eb;
+  padding: 8px 12px;
+  text-align: left;
+}
+
+.richText th {
+  background: #f9fafb;
+  font-weight: 600;
+}
