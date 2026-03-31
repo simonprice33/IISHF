@@ -9,6 +9,9 @@
   justify-content: space-between;
   gap: 16px;
   padding: 10px 16px;
+  max-width: none;
+  margin: 0 auto;
+  width: 60%;
 }
 
 .brand {
@@ -24,9 +27,9 @@
 }
 
 .logoImg {
-  height: 80px;            /* matches your Razor CSS intent */
+  height: 80px;
   width: auto;
-  image-rendering: auto;   /* avoid pixelated rendering */
+  image-rendering: auto;
 }
 
 .burger {
