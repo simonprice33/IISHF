@@ -1,7 +1,6 @@
 import { NextResponse } from "next/server";
-import https from "https";
 
-const UMBRACO_BASE = (process.env.UMBRACO_BASE_URL ?? "https://localhost:44395").replace(/\/+$/, "");
+const UMBRACO_BASE = (process.env.UMBRACO_BASE_URL ?? "http://localhost:32424").replace(/\/+$/, "");
 
 // Next 16: params is a Promise
 type Ctx = { params: Promise<{ path?: string[] }> };
@@ -40,13 +39,9 @@ export async function GET(req: Request, ctx: Ctx) {
     const res = await fetch(targetUrl, {
       method: "GET",
       headers: {
-        // Forward what matters (keep it minimal, but correct)
         Accept: req.headers.get("accept") ?? "application/json",
         Authorization: req.headers.get("authorization") ?? "",
       },
-      ...(process.env.NODE_ENV === "development"
-        ? { agent: new https.Agent({ rejectUnauthorized: false }) }
-        : {}),
       cache: "no-store",
     });
 
@@ -57,19 +52,19 @@ export async function GET(req: Request, ctx: Ctx) {
       status: res.status,
       headers: {
         "content-type": contentType,
-        // Helpful debug header (remove later if you want)
         "x-umbraco-proxy-target": targetUrl,
       },
     });
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const e = err as { message?: string; code?: string };
     console.error("Umbraco proxy failed", {
       targetUrl,
-      message: err?.message,
-      code: err?.code,
+      message: e?.message,
+      code: e?.code,
     });
 
     return NextResponse.json(
-      { error: "Umbraco proxy failed", targetUrl, message: err?.message, code: err?.code },
+      { error: "Umbraco proxy failed", targetUrl, message: e?.message, code: e?.code },
       { status: 500 }
     );
   }

@@ -1,0 +1,142 @@
+/* Matches .home-contact-section: #303030 + stripe SVG */
+.section {
+  width: 100%;
+  min-height: 400px;
+  background-color: #303030;
+  background-image: url("/images/section-background-stripes2.svg");
+  background-repeat: repeat;
+  background-size: 100% 100%;
+  padding: 40px 0 48px;
+}
+
+.inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+/* 8/4 column split — matches Bootstrap col-8 / col-4 */
+.grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 40px;
+  align-items: start;
+}
+
+@media (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+    gap: 32px;
+  }
+}
+
+/* ── Heading — "Message us" / "Data Protection..." in orange ── */
+.heading {
+  font-size: 22px;
+  font-weight: 600;
+  color: #f7941d;
+  margin: 0 0 20px;
+}
+
+/* ── Form ── */
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 8px;
+}
+
+/* Transparent inputs with white border — matches .custom-input */
+.input {
+  width: 100%;
+  background-color: transparent;
+  border: 1px solid #ffffff;
+  color: #ffffff;
+  padding: 8px 12px;
+  font-size: 15px;
+  font-family: inherit;
+  border-radius: 4px;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #f7941d;
+}
+
+/* White placeholder text — matches .custom-input::placeholder */
+.input::placeholder {
+  color: #ffffff;
+  opacity: 1;
+}
+
+.textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+/* ── Validation errors ── */
+.error {
+  font-size: 13px;
+  color: #ff8080;
+}
+
+/* ── Submit button — matches .btn-custom-submit ── */
+.submitBtn {
+  align-self: flex-start;
+  padding: 8px 20px;
+  background-color: #FF7C1F;
+  border: none;
+  color: #ffffff;
+  font-size: 15px;
+  font-family: inherit;
+  font-weight: 500;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 4px;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background-color: #B25716;
+}
+
+.submitBtn:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+}
+
+/* ── Success message — matches the original orange confirmation text ── */
+.successMessage {
+  color: #f7941d;
+  font-size: 18px;
+  font-weight: 500;
+  margin-top: 24px;
+  line-height: 1.5;
+}
+
+/* ── Policies column ── */
+.policiesCol {
+  padding-top: 4px;
+}
+
+/* Policy links — matches .nav-link-white */
+.policyLink {
+  display: block;
+  color: #e2e1e2;
+  text-decoration: none;
+  font-size: 15px;
+  padding: 4px 0;
+  transition: color 0.15s;
+}
+
+.policyLink:hover {
+  color: #ffffff;
+}

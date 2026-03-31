@@ -33,8 +33,12 @@ async function getChildrenByPath(pathKey: string, take = 200): Promise<DeliveryI
     `&take=${take}`;
 
   const url = toAbsoluteUrl(path);
-  const { data } = await axios.get<DeliveryPagedResponse<DeliveryItem>>(url);
-  return data.items ?? [];
+  try {
+    const { data } = await axios.get<DeliveryPagedResponse<DeliveryItem>>(url);
+    return data.items ?? [];
+  } catch {
+    return [];
+  }
 }
 
 /**

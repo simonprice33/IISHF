@@ -296,44 +296,9 @@ export function LiveStreamContainer() {
     return () => { cancelled = true; };
   }, []);
 
-  // LOADING STATE: Show checking status inside the placeholder box
-  if (isLoading) {
-    return (
-      <section className={styles.wrap} aria-label="Live streams">
-        <div className={styles.inner}>
-          <div className={styles.header}>
-            <div className={styles.kicker}>Live Streams</div>
-            <div className={styles.title}>
-              IISHF <span className={styles.orange}>Live</span> Feed
-            </div>
-          </div>
-          <div className={styles.noFeedsContainer}>
-            <div className={styles.noFeedsMessage}>{status}</div>
-          </div>
-        </div>
-      </section>
-    );
-  }
-
-  // NO FEEDS: Show "no feeds" message
-  if (visibleFeeds.length === 0) {
-    return (
-      <section className={styles.wrap} aria-label="Live streams">
-        <div className={styles.inner}>
-          <div className={styles.header}>
-            <div className={styles.kicker}>Live Streams</div>
-            <div className={styles.title}>
-              IISHF <span className={styles.orange}>Live</span> Feed
-            </div>
-          </div>
-          <div className={styles.noFeedsContainer}>
-            <div className={styles.noFeedsMessage}>
-              No video feeds are currently available for this event
-            </div>
-          </div>
-        </div>
-      </section>
-    );
+  // LOADING or NO FEEDS: render nothing — section only appears when feeds are live
+  if (isLoading || visibleFeeds.length === 0) {
+    return null;
   }
 
   // SINGLE FEED: Show larger layout with consistent header

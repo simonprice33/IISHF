@@ -1,13 +1,5 @@
 "use client";
 
-/**
- * src/components/Navbar/Navbar.tsx
- *
- * Minimal adjustments:
- * - Accept debugStatus as an optional prop for compatibility, but DO NOT render it.
- * - Keep the rest of the working behaviour exactly the same.
- */
-
 import Link from "next/link";
 import Image from "next/image";
 import { useMemo, useState } from "react";
@@ -16,13 +8,7 @@ import styles from "./Navbar.module.css";
 
 type Props = {
   items: NavItem[];
-
-  /**
-   * Kept only for backwards compatibility with earlier container variants.
-   * Per your requirement, we do not render this.
-   */
-  debugStatus?: string;
-
+  debugStatus?: string; // kept for backwards-compat, not rendered
   status?: "loading" | "ok" | "error";
 };
 
@@ -34,7 +20,6 @@ function groupLabel(key: NavGroupKey) {
 }
 
 function guessTournamentGroup(item: NavItem): NavGroupKey {
-  // Use navGroupKey if present; otherwise fallback to title match
   if (item.navGroupKey) return item.navGroupKey;
   const t = item.title.toLowerCase();
   if (t.includes("cup")) return "europeanCups";
@@ -54,15 +39,29 @@ function DocIcon({ ext }: { ext?: string }) {
           ? "XLS"
           : "FILE";
 
-  return <span className={styles.docIcon}>{label}</span>;
+  return (
+    <span className={styles.docIcon} data-ext={e}>
+      {label}
+    </span>
+  );
+}
+
+/**
+ * Converts a raw Umbraco /media/… path into a URL the browser can open.
+ * - Relative paths are routed through the Next.js proxy at /api/umbraco/media/…
+ * - Absolute paths (Azure CDN etc.) are used as-is.
+ */
+function resolveDocHref(fileUrl: string): string {
+  if (fileUrl.startsWith("http://") || fileUrl.startsWith("https://")) return fileUrl;
+  const clean = fileUrl.startsWith("/") ? fileUrl : `/${fileUrl}`;
+  return `/api/umbraco${clean}`;
 }
 
 export function NavBar({ items, status }: Props) {
   const [openKey, setOpenKey] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
 
-  // Small delay prevents “hover collapses before click”
-  let closeTimer: any = null;
+  let closeTimer: ReturnType<typeof setTimeout> | null = null;
   function open(k: string) {
     if (closeTimer) clearTimeout(closeTimer);
     setOpenKey(k);
@@ -73,16 +72,12 @@ export function NavBar({ items, status }: Props) {
   }
 
   const top = items;
-
   const tournaments = top.find((x) => x.title.toLowerCase() === "tournaments");
 
   const tournamentsColumns = useMemo(() => {
     if (!tournaments?.children?.length) return [];
 
-    // tournaments.children are categories like European Cups, etc,
-    // each category has its own children now.
     const cols: Record<string, NavItem[]> = {};
-
     for (const cat of tournaments.children) {
       const key = guessTournamentGroup(cat);
       cols[key] = cat.children ?? [];
@@ -90,19 +85,19 @@ export function NavBar({ items, status }: Props) {
 
     return [
       { key: "europeanCups", title: groupLabel("europeanCups"), items: cols["europeanCups"] ?? [] },
-      {
-        key: "europeanChampionships",
-        title: groupLabel("europeanChampionships"),
-        items: cols["europeanChampionships"] ?? [],
-      },
+      { key: "europeanChampionships", title: groupLabel("europeanChampionships"), items: cols["europeanChampionships"] ?? [] },
       { key: "noneTitleEvents", title: groupLabel("noneTitleEvents"), items: cols["noneTitleEvents"] ?? [] },
     ];
   }, [tournaments]);
 
   function hasDropdown(i: NavItem) {
-    // News should NOT dropdown even if someone accidentally adds children later
     if (i.title.toLowerCase() === "news") return false;
     return (i.children?.length ?? 0) > 0;
+  }
+
+  function closeMenu() {
+    setMobileOpen(false);
+    setOpenKey(null);
   }
 
   return (
@@ -136,7 +131,6 @@ export function NavBar({ items, status }: Props) {
               const key = item.url;
               const dropdown = hasDropdown(item);
               const isOpen = openKey === key;
-
               const isTournaments = item.title.toLowerCase() === "tournaments";
               const isDocuments = item.title.toLowerCase() === "documents";
 
@@ -147,8 +141,6 @@ export function NavBar({ items, status }: Props) {
                   onMouseEnter={() => dropdown && open(key)}
                   onMouseLeave={() => dropdown && closeSoon()}
                 >
-                  {/* Items with dropdown: click opens dropdown, not navigates */}
-                  {/* Items without dropdown: click navigates */}
                   <div className={styles.navLinkRow}>
                     {dropdown ? (
                       <button
@@ -166,14 +158,7 @@ export function NavBar({ items, status }: Props) {
                         <span className={styles.caret}>▾</span>
                       </button>
                     ) : (
-                      <Link
-                        href={item.url}
-                        className={styles.navLink}
-                        onClick={() => {
-                          setMobileOpen(false);
-                          setOpenKey(null);
-                        }}
-                      >
+                      <Link href={item.url} className={styles.navLink} onClick={closeMenu}>
                         {item.title}
                       </Link>
                     )}
@@ -193,14 +178,7 @@ export function NavBar({ items, status }: Props) {
                               <ul className={styles.dropList}>
                                 {col.items.map((c) => (
                                   <li key={c.url} className={styles.dropItem}>
-                                    <Link
-                                      href={c.url}
-                                      className={styles.dropLink}
-                                      onClick={() => {
-                                        setMobileOpen(false);
-                                        setOpenKey(null);
-                                      }}
-                                    >
+                                    <Link href={c.url} className={styles.dropLink} onClick={closeMenu}>
                                       {c.title}
                                     </Link>
                                   </li>
@@ -213,17 +191,24 @@ export function NavBar({ items, status }: Props) {
                         <ul className={styles.dropList}>
                           {(item.children ?? []).map((c) => (
                             <li key={c.url} className={styles.dropItem}>
-                              <Link
-                                href={c.url}
-                                className={styles.dropLink}
-                                onClick={() => {
-                                  setMobileOpen(false);
-                                  setOpenKey(null);
-                                }}
-                              >
-                                {isDocuments && <DocIcon ext={c.fileExt} />}
-                                {c.title}
-                              </Link>
+                              {isDocuments && c.fileUrl ? (
+                                /* Document: open the actual file in a new tab */
+                                <a
+                                  href={resolveDocHref(c.fileUrl)}
+                                  className={styles.dropLink}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                  onClick={closeMenu}
+                                >
+                                  <DocIcon ext={c.fileExt} />
+                                  {c.title}
+                                </a>
+                              ) : (
+                                /* All other dropdown items: internal navigation */
+                                <Link href={c.url} className={styles.dropLink} onClick={closeMenu}>
+                                  {c.title}
+                                </Link>
+                              )}
                             </li>
                           ))}
                         </ul>
@@ -234,16 +219,11 @@ export function NavBar({ items, status }: Props) {
               );
             })}
 
-            {/* Auth links can be hard-coded for now */}
             <li className={styles.navItem}>
-              <Link className={styles.navLink} href="/signup">
-                Sign up
-              </Link>
+              <Link className={styles.navLink} href="/signup">Sign up</Link>
             </li>
             <li className={styles.navItem}>
-              <Link className={styles.navLink} href="/signin">
-                Sign in
-              </Link>
+              <Link className={styles.navLink} href="/signin">Sign in</Link>
             </li>
           </ul>
 

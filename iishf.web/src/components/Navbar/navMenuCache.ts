@@ -18,7 +18,7 @@ import type { NavItem } from "./types";
 import { buildMenu } from "./buildMenu";
 import { getChildren } from "@/lib/umbracoApi";
 
-const STORAGE_KEY = "iishf.navMenu.v1";
+const STORAGE_KEY = "iishf.navMenu.v2"; // bump when NavItem shape changes
 
 let memoryCache: NavItem[] | null = null;
 let inFlight: Promise<NavItem[]> | null = null;

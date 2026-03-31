@@ -1,5 +1,7 @@
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddControllers();
+
 builder.CreateUmbracoBuilder()
     .AddBackOffice()
     .AddWebsite()
@@ -23,5 +25,7 @@ app.UseUmbraco()
         u.UseBackOfficeEndpoints();
         u.UseWebsiteEndpoints();
     });
+
+app.MapControllers();
 
 await app.RunAsync();
