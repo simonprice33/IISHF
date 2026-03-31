@@ -146,15 +146,40 @@
   margin: 6px 10px 10px;
 }
 
-/* Document "icons" (simple + dependency-free) */
+/* Document type badges — colour-coded by file extension */
 .docIcon {
-  font-size: 11px;
+  display: inline-block;
+  font-size: 10px;
   font-weight: 700;
-  color: #444;
-  border: 1px solid #ccc;
-  background: #fafafa;
+  letter-spacing: 0.04em;
   padding: 2px 6px;
-  border-radius: 6px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background: #f3f3f3;
+  color: #555;
+  flex-shrink: 0;
+  min-width: 34px;
+  text-align: center;
+}
+
+.docIcon[data-ext="pdf"] {
+  background: #fee2e2;
+  color: #b91c1c;
+  border-color: #fca5a5;
+}
+
+.docIcon[data-ext="doc"],
+.docIcon[data-ext="docx"] {
+  background: #dbeafe;
+  color: #1d4ed8;
+  border-color: #93c5fd;
+}
+
+.docIcon[data-ext="xls"],
+.docIcon[data-ext="xlsx"] {
+  background: #dcfce7;
+  color: #15803d;
+  border-color: #86efac;
 }
 
 /* Status */
@@ -203,4 +228,11 @@
   .megaGrid {
     grid-template-columns: 1fr;
   }
+}
+
+.debugStatus {
+  font-size: 0.9rem;
+  padding: 6px 10px;
+  margin-right: 12px;
+  opacity: 0.85;
 }

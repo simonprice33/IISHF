@@ -1,0 +1,56 @@
+h1, h2, h3, h4 {
+    font-family: 'Raleway Light', Arial, sans-serif;
+    font-weight: 300;
+}
+
+.fs63{
+    font-size: 63px;
+}
+
+.fs22 {
+    font-size: 22px;
+}
+
+.serif {
+    font-family: Open Sans, sans-serif, Arial;
+    font-size: 34px;
+    line-height: 1.8;
+    color: #DEDEDE;
+    text-shadow: 1px 2px 5px #222;
+}
+
+.custom-input::placeholder {
+    color: white;
+}
+
+.custom-input::-webkit-input-placeholder { /* Chrome/Opera/Safari */
+    color: white;
+}
+
+.custom-input::-moz-placeholder { /* Firefox 19+ */
+    color: white;
+}
+
+.custom-input:-ms-input-placeholder { /* IE 10+ */
+    color: white;
+}
+
+.custom-input:-moz-placeholder { /* Firefox 18- */
+    color: white;
+}
+
+@media only screen and (max-width: 600px) {
+
+    .home-header-section h1 {
+        font-size: 36px; /* Adjust to a suitable size for mobile */
+    }
+
+    .home-header-section .sub-heading {
+        font-size: 18px; /* Adjust to a suitable size for mobile */
+    }
+
+    h4 {
+        font-size: smaller; /* Adjust the font size */
+        word-wrap: break-word; /* Ensures long words do not overflow */
+    }
+}

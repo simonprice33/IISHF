@@ -2,8 +2,9 @@ export type NavGroupKey = "europeanCups" | "europeanChampionships" | "noneTitleE
 
 export type NavItem = {
   title: string;
-  url: string;               // route path OR direct file url (/media/...)
+  url: string;               // content route path
   children?: NavItem[];
   navGroupKey?: NavGroupKey; // used for tournaments mega columns
-  fileExt?: string;          // used for doc icons
+  fileExt?: string;          // pdf | docx | xlsx … used for doc icons
+  fileUrl?: string;          // raw media URL from Umbraco e.g. /media/xxx/file.pdf
 };

@@ -144,3 +144,14 @@ a { color: inherit; text-decoration: none; }
   text-align: center;
   opacity: 0.95;
 }
+
+/* Custom font styles */
+h1, h2, h3, h4 {
+    font-family: 'Raleway', Arial, sans-serif !important;
+    font-weight: 300;
+}
+
+/* Orange accent color utility */
+.orange {
+    color: #f7941d;
+}
