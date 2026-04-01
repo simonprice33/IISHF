@@ -19,10 +19,17 @@
 .inner {
   position: relative;
   z-index: 1;
-  width: 100%;
-  max-width: 1200px;
+  width: 60%;
+  max-width: none;
   margin: 0 auto;
-  padding: 60px 24px;
+  padding: 60px 0;
+}
+
+@media (max-width: 900px) {
+  .inner {
+    width: 92%;
+    padding: 40px 0;
+  }
 }
 
 .title {

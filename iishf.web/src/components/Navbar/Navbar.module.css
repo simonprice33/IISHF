@@ -1,6 +1,9 @@
 .header {
   background: #3f3f3f;
   color: #fff;
+  position: sticky;
+  top: 0;
+  z-index: 1000;
 }
 
 .inner {
@@ -194,6 +197,11 @@
 
 /* Mobile */
 @media (max-width: 900px) {
+  .inner {
+    width: 100%;
+    padding: 8px 16px;
+  }
+
   .burger {
     display: inline-flex;
   }

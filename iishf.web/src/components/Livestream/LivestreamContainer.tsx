@@ -4,6 +4,7 @@ import React, { useEffect, useState } from "react";
 import styles from "./LiveStream.module.css";
 import type { DeliveryItem } from "@/lib/umbracoTypes";
 import { asString } from "@/lib/umbracoTypes";
+import { buildEmbedUrl as sharedBuildEmbedUrl } from "@/lib/embedUtils";
 import { getChildren } from "@/lib/umbracoApi";
 
 type LiveFeedLink = {
@@ -61,85 +62,8 @@ function parseLinkArray(value: unknown): LiveFeedLink[] {
   return result;
 }
 
-function detectProvider(url: string): string {
-  const u = url.toLowerCase();
-  if (u.includes("youtu.be") || u.includes("youtube.com")) return "youtube";
-  if (u.includes("vimeo.com")) return "vimeo";
-  if (u.includes("twitch.tv")) return "twitch";
-  if (u.includes("sportdeutschland.tv")) return "sportdeutschland";
-  if (u.includes("sport-europe") || u.includes("sporteurope")) return "sporteurope";
-  return "generic";
-}
-
-function getTwitchParentParam(): string {
-  if (typeof window === "undefined") return "localhost";
-  return window.location.hostname || "localhost";
-}
-
 function buildEmbedUrl(rawUrl: string): { provider: string; embedUrl: string } | null {
-  const provider = detectProvider(rawUrl);
-
-  try {
-    const abs =
-      rawUrl.startsWith("http://") || rawUrl.startsWith("https://")
-        ? rawUrl
-        : `https://${rawUrl}`;
-
-    const url = new URL(abs);
-    const host = url.hostname.toLowerCase();
-    const path = url.pathname;
-
-    if (provider === "youtube") {
-      if (host.includes("youtu.be")) {
-        const id = path.split("/").filter(Boolean)[0];
-        if (!id) return null;
-        return { provider, embedUrl: `https://www.youtube.com/embed/${id}` };
-      }
-      if (host.includes("youtube.com")) {
-        const v = url.searchParams.get("v");
-        if (v) return { provider, embedUrl: `https://www.youtube.com/embed/${v}` };
-        const parts = path.split("/").filter(Boolean);
-        const embedIdx = parts.findIndex((p) => p === "embed");
-        if (embedIdx >= 0 && parts[embedIdx + 1]) {
-          return { provider, embedUrl: `https://www.youtube.com/embed/${parts[embedIdx + 1]}` };
-        }
-      }
-    }
-
-    if (provider === "vimeo") {
-      const parts = path.split("/").filter(Boolean);
-      const id = parts.includes("video") ? parts[parts.indexOf("video") + 1] : parts[0];
-      if (!id) return null;
-      return { provider, embedUrl: `https://player.vimeo.com/video/${id}` };
-    }
-
-    if (provider === "twitch") {
-      const parent = encodeURIComponent(getTwitchParentParam());
-      const parts = path.split("/").filter(Boolean);
-      const videosIdx = parts.findIndex((p) => p === "videos");
-      if (videosIdx >= 0 && parts[videosIdx + 1]) {
-        const vodId = parts[videosIdx + 1];
-        return {
-          provider,
-          embedUrl: `https://player.twitch.tv/?video=${encodeURIComponent(vodId)}&parent=${parent}&autoplay=true`,
-        };
-      }
-      const channel = parts[0];
-      if (!channel) return null;
-      return {
-        provider,
-        embedUrl: `https://player.twitch.tv/?channel=${encodeURIComponent(channel)}&parent=${parent}&autoplay=true`,
-      };
-    }
-
-    if (provider === "sportdeutschland" || provider === "sporteurope") {
-      return { provider, embedUrl: abs };
-    }
-
-    return { provider, embedUrl: abs };
-  } catch {
-    return null;
-  }
+  return sharedBuildEmbedUrl(rawUrl);
 }
 
 function getRoutePath(item: DeliveryItem): string {

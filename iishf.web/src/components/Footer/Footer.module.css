@@ -5,9 +5,16 @@
 }
 
 .inner {
-  max-width: 1200px;
+  width: 60%;
+  max-width: none;
   margin: 0 auto;
   text-align: center;
   font-size: 14px;
   opacity: 0.9;
+}
+
+@media (max-width: 900px) {
+  .inner {
+    width: 92%;
+  }
 }
