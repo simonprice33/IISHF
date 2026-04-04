@@ -96,7 +96,7 @@
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
   padding: 2rem 2.5rem;
   min-height: 300px;
-  width:650px;
+  width:1050px;
 }
 
 /* ── Shared ───────────────────────────────────────────────────────────────── */
@@ -727,7 +727,7 @@
   .tabNav {
     flex-direction: row;
     flex-wrap: wrap;
-    width: 90%;
+    width: 100%;
     min-width: 0;
   }
 
@@ -783,7 +783,7 @@
   .gameAwayLogo  { grid-column: 1; grid-row: 3; }
 
   .card {
-    max-width: 90%;
+    max-width: 100%;
     width: auto !important;
   }
 }
