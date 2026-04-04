@@ -1,0 +1,259 @@
+/* Shared auth page styles — dark themed to match site */
+
+.page {
+  min-height: 80vh;
+  background: #303030;
+  background-image: url("/images/section-background-stripes2.svg");
+  background-repeat: repeat;
+  background-size: 100% 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 16px;
+}
+
+.card {
+  background: #222;
+  border-radius: 10px;
+  padding: 40px 36px;
+  width: 100%;
+  max-width: 440px;
+  box-shadow: 0 12px 36px rgba(0, 0, 0, 0.4);
+}
+
+@media (max-width: 480px) {
+  .card {
+    padding: 28px 20px;
+  }
+}
+
+.title {
+  font-size: 26px;
+  font-weight: 600;
+  color: #fff;
+  margin: 0 0 6px;
+}
+
+.subtitle {
+  font-size: 14px;
+  color: #aaa;
+  margin: 0 0 28px;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.fieldGroup {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.label {
+  font-size: 13px;
+  color: #ccc;
+  font-weight: 500;
+}
+
+.input {
+  width: 100%;
+  background: transparent;
+  border: 1px solid #555;
+  color: #fff;
+  padding: 10px 12px;
+  font-size: 15px;
+  font-family: inherit;
+  border-radius: 6px;
+  box-sizing: border-box;
+  transition: border-color 0.2s;
+}
+
+.input:focus {
+  outline: none;
+  border-color: #f7941d;
+}
+
+.input::placeholder {
+  color: #777;
+  opacity: 1;
+}
+
+.fieldError {
+  font-size: 12px;
+  color: #ff8080;
+  margin-top: 2px;
+}
+
+.formError {
+  font-size: 14px;
+  color: #ff8080;
+  background: rgba(255, 80, 80, 0.08);
+  border: 1px solid rgba(255, 80, 80, 0.2);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+.formSuccess {
+  font-size: 14px;
+  color: #f7941d;
+  background: rgba(247, 148, 29, 0.08);
+  border: 1px solid rgba(247, 148, 29, 0.2);
+  border-radius: 6px;
+  padding: 10px 12px;
+}
+
+.submitBtn {
+  width: 100%;
+  padding: 11px 20px;
+  background: #f7941d;
+  border: none;
+  color: #fff;
+  font-size: 16px;
+  font-family: inherit;
+  font-weight: 600;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.2s;
+  margin-top: 4px;
+}
+
+.submitBtn:hover:not(:disabled) {
+  background: #d97d18;
+}
+
+.submitBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.divider {
+  border: none;
+  border-top: 1px solid #444;
+  margin: 24px 0;
+}
+
+.links {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-align: center;
+  font-size: 14px;
+  color: #aaa;
+}
+
+.link {
+  color: #f7941d;
+  text-decoration: none;
+  transition: color 0.15s;
+}
+
+.link:hover {
+  color: #ffb055;
+}
+
+/* My Account styles */
+.accountPage {
+  min-height: 80vh;
+  background: #303030;
+  background-image: url("/images/section-background-stripes2.svg");
+  background-repeat: repeat;
+  background-size: 100% 100%;
+  padding: 48px 16px;
+}
+
+.accountInner {
+  max-width: 760px;
+  margin: 0 auto;
+}
+
+.accountTitle {
+  font-size: 30px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 8px;
+}
+
+.accountSubtitle {
+  font-size: 15px;
+  color: #aaa;
+  margin: 0 0 32px;
+}
+
+.section {
+  background: #222;
+  border-radius: 10px;
+  padding: 28px 28px;
+  margin-bottom: 24px;
+}
+
+.sectionTitle {
+  font-size: 17px;
+  font-weight: 600;
+  color: #f7941d;
+  margin: 0 0 20px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid #333;
+}
+
+.profileRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 0;
+  border-bottom: 1px solid #2a2a2a;
+  font-size: 15px;
+}
+
+.profileRow:last-child {
+  border-bottom: none;
+}
+
+.profileLabel {
+  color: #888;
+  min-width: 120px;
+}
+
+.profileValue {
+  color: #fff;
+  font-weight: 500;
+}
+
+.badge {
+  display: inline-block;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 8px;
+  border-radius: 10px;
+}
+
+.badgeVerified {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+  border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.badgePending {
+  background: rgba(234, 179, 8, 0.15);
+  color: #facc15;
+  border: 1px solid rgba(234, 179, 8, 0.2);
+}
+
+.logoutBtn {
+  padding: 9px 20px;
+  background: transparent;
+  border: 1px solid #555;
+  color: #ccc;
+  font-size: 14px;
+  font-family: inherit;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.logoutBtn:hover {
+  border-color: #ff8080;
+  color: #ff8080;
+}
