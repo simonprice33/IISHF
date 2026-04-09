@@ -2,12 +2,6 @@
 
 /**
  * src/components/Navbar/NavBarContainer.tsx
- *
- * Minimal change:
- * - Replace the inline build/fetch logic with a cached call to getNavMenu().
- *
- * This avoids repeated menu rebuilds (especially after any hard refresh),
- * and dramatically reduces repeated calls into Umbraco during development.
  */
 
 import { useEffect, useState } from "react";
@@ -17,6 +11,7 @@ import { getNavMenu } from "./navMenuCache";
 
 export function NavBarContainer() {
   const [items, setItems] = useState<NavItem[]>([]);
+  const [hasTodaysGames, setHasTodaysGames] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -33,13 +28,33 @@ export function NavBarContainer() {
       }
     }
 
+    async function checkTodaysGames() {
+      try {
+        const res = await fetch("/api/todays-games", { cache: "no-store" });
+        if (!res.ok) return;
+        const data = await res.json();
+        if (cancelled) return;
+        // Show link if at least one event has at least one game
+        const hasGames =
+          Array.isArray(data) &&
+          data.some(
+            (ev: { games?: unknown[] }) =>
+              Array.isArray(ev.games) && ev.games.length > 0
+          );
+        setHasTodaysGames(hasGames);
+      } catch {
+        // Silently ignore — link just won't show
+      }
+    }
+
     load();
+    checkTodaysGames();
 
     return () => {
       cancelled = true;
     };
   }, []);
 
-  // NOTE: We do NOT render any “Loading navigation…” text (per your requirement).
-  return <Navbar items={items} />;
+  // NOTE: We do NOT render any "Loading navigation…" text (per your requirement).
+  return <Navbar items={items} hasTodaysGames={hasTodaysGames} />;
 }

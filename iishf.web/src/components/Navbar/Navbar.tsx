@@ -10,6 +10,7 @@ type Props = {
   items: NavItem[];
   debugStatus?: string; // kept for backwards-compat, not rendered
   status?: "loading" | "ok" | "error";
+  hasTodaysGames?: boolean;
 };
 
 function groupLabel(key: NavGroupKey) {
@@ -57,7 +58,7 @@ function resolveDocHref(fileUrl: string): string {
   return `/api/umbraco${clean}`;
 }
 
-export function NavBar({ items, status }: Props) {
+export function NavBar({ items, status, hasTodaysGames }: Props) {
   const [openKey, setOpenKey] = useState<string | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -171,6 +172,17 @@ export function NavBar({ items, status }: Props) {
                       onMouseLeave={() => closeSoon()}
                     >
                       {isTournaments ? (
+                        <>
+                          {hasTodaysGames && (
+                            <Link
+                              href="/tournaments/todays-games"
+                              className={styles.todaysGamesLink}
+                              onClick={closeMenu}
+                            >
+                              <span className={styles.todaysGamesDot} />
+                              Today&apos;s Games
+                            </Link>
+                          )}
                         <div className={styles.megaGrid}>
                           {tournamentsColumns.map((col) => (
                             <div key={col.key} className={styles.megaCol}>
@@ -187,6 +199,7 @@ export function NavBar({ items, status }: Props) {
                             </div>
                           ))}
                         </div>
+                        </>
                       ) : (
                         <ul className={styles.dropList}>
                           {(item.children ?? []).map((c) => (
@@ -220,10 +233,10 @@ export function NavBar({ items, status }: Props) {
             })}
 
             <li className={styles.navItem}>
-              <Link className={styles.navLink} href="/signup">Sign up</Link>
+              <Link className={styles.navLink} href="/register">Sign up</Link>
             </li>
             <li className={styles.navItem}>
-              <Link className={styles.navLink} href="/signin">Sign in</Link>
+              <Link className={styles.navLink} href="/login">Sign in</Link>
             </li>
           </ul>
 
