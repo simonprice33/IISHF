@@ -1,8 +1,12 @@
 // src/app/news/page.tsx
+import { Suspense } from "react";
 import NewsPageClient from "@/components/News/NewsPageClient";
 
 export default function NewsPage() {
-  // Client component fetches and manages filters/paging via query string,
-  // so this server page stays simple and stable.
-  return <NewsPageClient />;
+  // NewsPageClient uses useSearchParams(), so it must be wrapped in Suspense.
+  return (
+    <Suspense fallback={<div style={{ padding: "2rem", textAlign: "center" }}>Loading news…</div>}>
+      <NewsPageClient />
+    </Suspense>
+  );
 }

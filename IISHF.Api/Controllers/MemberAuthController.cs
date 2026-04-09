@@ -1,5 +1,5 @@
+using IISHF.Api.Services;
 using IISHF.Application.Records;
-using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Mvc;
 using Umbraco.Cms.Core.Security;
 using Umbraco.Cms.Core.Services;
@@ -14,17 +14,20 @@ public class MemberAuthController : ControllerBase
     private readonly IMemberManager _memberManager;
     private readonly IMemberService _memberService;
     private readonly IMemberSignInManager _memberSignInManager;
+    private readonly AuthEmailService _emailService;
     private readonly ILogger<MemberAuthController> _logger;
 
     public MemberAuthController(
         IMemberManager memberManager,
         IMemberService memberService,
         IMemberSignInManager memberSignInManager,
+        AuthEmailService emailService,
         ILogger<MemberAuthController> logger)
     {
         _memberManager = memberManager;
         _memberService = memberService;
         _memberSignInManager = memberSignInManager;
+        _emailService = emailService;
         _logger = logger;
     }
 
@@ -99,7 +102,6 @@ public class MemberAuthController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(ModelState);
 
-        // Check if email already in use
         var existing = await _memberManager.FindByEmailAsync(request.Email);
         if (existing != null)
             return Conflict(new { error = "An account with this email already exists." });
@@ -119,22 +121,20 @@ public class MemberAuthController : ControllerBase
             return BadRequest(new { error = errors });
         }
 
-        // Generate email verification token
         var token = await _memberManager.GenerateEmailConfirmationTokenAsync(identityMember);
 
-        // Persist the token on the member record so we can verify it later
-        var member = _memberService.GetByEmail(request.Email);
-        if (member != null)
+        try
         {
-            member.SetValue("emailVerificationToken", token);
-            _memberService.Save(member);
+            await _emailService.SendVerificationEmailAsync(request.Email, request.Name, token);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send verification email to {Email}", request.Email);
+            // Don't fail the registration if email sending fails — member is created
         }
 
-        _logger.LogInformation("New member registered: {Email}. Verification token generated.", request.Email);
-
-        // In production you would send an email here with a link containing the token.
-        // For now we return the token so the frontend can handle it (dev mode).
-        return Ok(new { success = true, verificationToken = token });
+        _logger.LogInformation("New member registered: {Email}", request.Email);
+        return Ok(new { success = true });
     }
 
     // POST /api/memberauth/verify
@@ -173,22 +173,23 @@ public class MemberAuthController : ControllerBase
         if (!ModelState.IsValid)
             return BadRequest(new { error = "Invalid request." });
 
-        // Always return success so we don't reveal whether the email exists
+        // Always return success — never reveal whether the email exists
         var member = await _memberManager.FindByEmailAsync(request.Email);
         if (member != null)
         {
             var token = await _memberManager.GeneratePasswordResetTokenAsync(member);
+            var name = member.Name ?? member.Email ?? request.Email;
 
-            // Persist the token for verification
-            var umbracoMember = _memberService.GetByEmail(request.Email);
-            if (umbracoMember != null)
+            try
             {
-                umbracoMember.SetValue("passwordResetToken", token);
-                _memberService.Save(umbracoMember);
+                await _emailService.SendPasswordResetEmailAsync(request.Email, name, token);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Failed to send password reset email to {Email}", request.Email);
             }
 
-            _logger.LogInformation("Password reset requested for {Email}. Token generated.", request.Email);
-            // In production: send email with reset link containing token + email
+            _logger.LogInformation("Password reset email sent to {Email}", request.Email);
         }
 
         return Ok(new { success = true });

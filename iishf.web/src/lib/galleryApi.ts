@@ -177,6 +177,10 @@ export async function getMemberAssociationSlides(): Promise<GallerySlide[]> {
   const slides: GallerySlide[] = [];
 
   for (const item of slideItems) {
+    // Only show active member associations in the carousel
+    const isActive = item.properties?.nmaIsActive;
+    if (isActive === false) continue;
+
     const rawImageUrl = extractMediaUrl(item);
     if (!rawImageUrl) continue;
 
